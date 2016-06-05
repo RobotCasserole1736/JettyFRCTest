@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html>
+<title>Casserole Data Live Update Test </title>
+<body>
+
+<h1>Data From Robot</h1>
+<div id="id01"></div>
+
+<script>
+var dataSocket = new WebSocket("ws://127.0.0.1:8080/datastream")
+
+dataSocket.onopen = function (event) {
+  //document.getElementById("id01").innerHTML = "<h2>Socket Opened</h2>";
+  dataSocket.send("Client Says: Can I haz data?"); 
+};
+
+dataSocket.onmessage = function (event) {
+  //document.getElementById("id01").innerHTML = "<h2>Got Data! " + event.data + " </h2>"; 
+  genTable(event.data);
+};
+
+function genTable(json_data) {
+    var arr = JSON.parse(json_data);
+    var i;
+    var out = "<table>";
+
+    for(i = 0; i < arr.state_array.length; i++) {
+        out += "<tr><td>" +
+        arr.state_array[i].key +
+        "</td><td>" +
+        arr.state_array[i].value +
+        "</td></tr>";
+    }
+    out += "</table>";
+    document.getElementById("id01").innerHTML = out;
+}
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,99 @@
+package websocketTest;
+import java.io.IOException;
+import java.util.TimerTask;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+
+import java.util.Timer;
+
+public class CasseroleDataStreamerSocket extends WebSocketAdapter {
+	private java.util.Timer updater = new java.util.Timer(); 
+	private int updatePeriodMS = 1000; //default update rate of 1s 
+	volatile int test_data;
+	
+	/**
+	 * Set the time between server broadcasts of current state. Default is 1 second. Faster update rates bog down both server and network.
+	 * @param in_period_ms Broadcast period in milliseconds.
+	 */
+	public void setUpdatePeriod(int in_period_ms){
+		updatePeriodMS = in_period_ms;
+	}
+	
+    @Override
+    public void onWebSocketText(String message) {
+        if (isConnected()) {
+            System.out.printf("Got client's message: [%s]%n", message);
+        }
+    }
+    
+    @Override
+    public void onWebSocketConnect(Session sess) {
+
+    	super.onWebSocketConnect(sess);
+    	//On client connect, begin new task to braodcast data at 1 second intervals
+    	test_data = 0;
+    	updater.scheduleAtFixedRate(new dataBroadcastTask(), 0, updatePeriodMS);
+    }
+    
+    @Override
+    public void onWebSocketClose(int statusCode, String reason) {
+
+    	super.onWebSocketClose(statusCode, reason);
+    	//On client disconnect, close down broadcast task
+    	updater.cancel();
+    }
+    
+	/**
+	 * send socket data out to client
+	 */
+	public void broadcastData() {
+        if (isConnected()) {
+            try {
+            	JSONObject full_obj = new JSONObject();
+            	JSONArray data_array = new JSONArray();
+            	JSONObject[] data_array_elements = new JSONObject[3];
+            	
+            	//Construct all key/value pairs to send to client
+            	data_array_elements[0] = new JSONObject();
+            	data_array_elements[0].put("key", "Test Integer Data");
+            	data_array_elements[0].put("value", test_data);
+            	data_array_elements[1] = new JSONObject();
+            	data_array_elements[1].put("key", "String Data");
+            	data_array_elements[1].put("value", "Chris Gerth!");
+            	data_array_elements[2] = new JSONObject();
+            	data_array_elements[2].put("key", "Random Double");
+            	data_array_elements[2].put("value", Math.random());
+            	
+            	//assemble full array to send to client
+            	data_array.add(data_array_elements[0]);
+            	data_array.add(data_array_elements[1]);
+            	data_array.add(data_array_elements[2]);
+            	
+            	//package array into object
+            	full_obj.put("state_array", data_array);
+        		getRemote().sendString(full_obj.toJSONString());
+        		test_data += 1;
+        		
+            } catch (IOException e) {
+                e.printStackTrace(System.err);
+            }
+        }
+	}
+	
+	/**
+	 *  Timer task to periodically broadcast data to the client. Java multithreading magic here, do not touch!
+	 *  If you touch this, you will face the wrath of Chitulu, god of data streaming servers. 
+	 *  May the oceans of 1's and 0's rise to praise him.
+	 * @author Chris Gerth
+	 *
+	 */
+	private class dataBroadcastTask extends TimerTask {
+		public void run() {
+				broadcastData();
+		}
+	}
+
+}
