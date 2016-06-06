@@ -9,7 +9,7 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import java.util.Timer;
 
-public class CasseroleDataStreamerSocket extends WebSocketAdapter {
+public class CasseroleStateStreamerSocket extends WebSocketAdapter {
 	private java.util.Timer updater = new java.util.Timer(); 
 	private int updatePeriodMS = 1000; //default update rate of 1s 
 	volatile int test_data;
@@ -54,23 +54,11 @@ public class CasseroleDataStreamerSocket extends WebSocketAdapter {
             try {
             	JSONObject full_obj = new JSONObject();
             	JSONArray data_array = new JSONArray();
-            	JSONObject[] data_array_elements = new JSONObject[3];
             	
-            	//Construct all key/value pairs to send to client
-            	data_array_elements[0] = new JSONObject();
-            	data_array_elements[0].put("key", "Test Integer Data");
-            	data_array_elements[0].put("value", test_data);
-            	data_array_elements[1] = new JSONObject();
-            	data_array_elements[1].put("key", "String Data");
-            	data_array_elements[1].put("value", "Chris Gerth!");
-            	data_array_elements[2] = new JSONObject();
-            	data_array_elements[2].put("key", "Random Double");
-            	data_array_elements[2].put("value", Math.random());
-            	
-            	//assemble full array to send to client
-            	data_array.add(data_array_elements[0]);
-            	data_array.add(data_array_elements[1]);
-            	data_array.add(data_array_elements[2]);
+            	//Package all data array elements into a JSON array
+            	for(JSONObject obj : CassesroleWebStates.data_array_elements){
+            		data_array.add(obj);
+            	}
             	
             	//package array into object
             	full_obj.put("state_array", data_array);
