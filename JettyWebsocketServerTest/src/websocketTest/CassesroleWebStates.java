@@ -8,6 +8,22 @@ import org.json.simple.JSONObject;
 public class CassesroleWebStates {
 	/** The list of objects which are broadcast. Must be volatile to ensure atomic accesses */
 	static volatile List<JSONObject> data_array_elements = new ArrayList<JSONObject>();
+	static CalWrangler wrangler_obj;
+	
+	/**
+	 * Sets the calibration wrangler which will be used for web operations
+	 */
+	public static void setCalWrangler(CalWrangler wrangler_in){
+		wrangler_obj = wrangler_in;
+	}
+	
+	/**
+	 * Get the present calWrangler being used for web operations
+	 * @return wrangler in use
+	 */
+	public static CalWrangler getCalWrangler(){
+		return wrangler_obj;
+	}
 	
 	/** 
 	 * Put a new state to the web interface, or update an existing one with the same name 

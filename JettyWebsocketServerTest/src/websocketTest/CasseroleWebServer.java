@@ -48,6 +48,10 @@ public class CasseroleWebServer {
 		ServletHolder statestreamHolder = new ServletHolder("statestream", new CasseroleStateStreamerServlet());
 		context.addServlet(statestreamHolder, "/statestream");
 		
+		//CalStreamer - Handles calibration viewing and updating 
+		ServletHolder calstreamHolder = new ServletHolder("calstream", new CasseroleCalStreamerServlet());
+		context.addServlet(calstreamHolder, "/calstream");
+		
 		// Kick off server in brand new thread.
 		// Thanks to Team 254 for an example of how to do this!
 		Thread serverThread = new Thread(new Runnable() {
