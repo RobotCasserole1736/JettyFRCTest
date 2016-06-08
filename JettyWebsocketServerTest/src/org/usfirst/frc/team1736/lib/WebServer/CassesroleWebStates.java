@@ -1,9 +1,10 @@
-package websocketTest;
+package org.usfirst.frc.team1736.lib.WebServer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.simple.JSONObject;
+import org.usfirst.frc.team1736.lib.Calibration.CalWrangler;
 
 public class CassesroleWebStates {
 	/** The list of objects which are broadcast. Must be volatile to ensure atomic accesses */

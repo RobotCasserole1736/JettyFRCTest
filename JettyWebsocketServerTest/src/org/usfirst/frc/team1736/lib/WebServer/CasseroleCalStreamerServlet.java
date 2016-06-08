@@ -1,4 +1,4 @@
-package websocketTest;
+package org.usfirst.frc.team1736.lib.WebServer;
 
 import javax.servlet.annotation.WebServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;

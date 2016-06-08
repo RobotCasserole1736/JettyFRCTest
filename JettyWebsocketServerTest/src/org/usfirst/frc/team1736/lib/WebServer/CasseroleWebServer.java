@@ -1,4 +1,4 @@
-package websocketTest;
+package org.usfirst.frc.team1736.lib.WebServer;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;

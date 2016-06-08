@@ -1,4 +1,4 @@
-package websocketTest;
+package org.usfirst.frc.team1736.lib.WebServer;
 
 import java.io.IOException;
 
@@ -7,13 +7,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class CasseroleBasicServlet extends HttpServlet {
+
+public class CasserolePingServlet extends HttpServlet {
 	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
-		response.setContentType("text/html");
+		response.setContentType("application/json;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.getWriter().println("<h1>FRC1736 Robot Casserole 2016 </h1>");	
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.getWriter().println("\"pong\"");	
 		
 	}
 

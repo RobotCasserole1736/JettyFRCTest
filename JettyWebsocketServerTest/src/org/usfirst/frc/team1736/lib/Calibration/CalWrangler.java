@@ -1,4 +1,4 @@
-package websocketTest;
+package org.usfirst.frc.team1736.lib.Calibration;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -52,14 +52,14 @@ public class CalWrangler {
 	private final int CAL_VAL_COL = 1;
 	private final int NUM_COLUMNS = 2;
 	
-	ArrayList<Calibration> registeredCals;
+	public ArrayList<Calibration> registeredCals;
 	final String calFile = "/U/calibration/present_cal.csv";
 	
 	/**
 	 * Constructor. Just does init on internal values.
 	 */
 	
-	CalWrangler(){
+	public CalWrangler(){
 		registeredCals = new ArrayList<Calibration>(0);
 		return;
 	}
