@@ -39,17 +39,13 @@ public class CassesroleDriverView {
 		return;
 	}
 	
-	public static void newWebcam(String name_in, String url_in, int display_x_pxl, int display_y_pxl){
-		//Sanitize user inputs
-
+	public static void newWebcam(String url_in){
 		//Create new object
 		JSONObject new_obj = new JSONObject();
 		new_obj.put("type", "webcam");
-		new_obj.put("name", name_in);
 		new_obj.put("url", url_in);
-		new_obj.put("sizex", Math.abs(display_x_pxl));
-		new_obj.put("sizey", Math.abs(display_y_pxl));
 		driverView_objects.add(new_obj);
+		return;
 	}
 	
 	//might be called from different threads, but all calls go to the web server thread.

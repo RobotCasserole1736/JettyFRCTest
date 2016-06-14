@@ -30,7 +30,7 @@ public class CasseroleWebServer {
 		ResourceHandler resource_handler = new ResourceHandler();
 	    resource_handler.setDirectoriesListed(true);
 	    resource_handler.setWelcomeFiles(new String[]{ "index.html" });
-	    resource_handler.setResourceBase(".");
+	    resource_handler.setResourceBase("resources/");
 		server.insertHandler(resource_handler);
 		
 		//StateStreamer - broadcasts present state of robot. RPM's, voltages, etc.
