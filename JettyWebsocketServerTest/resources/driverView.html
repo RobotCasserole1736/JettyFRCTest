@@ -4,7 +4,7 @@
 <title>Casserole Driver Data View</title>
 
 <head>
-  <link rel="stylesheet" href="./main.css">
+  <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
@@ -17,9 +17,13 @@
 
 <br>
 
-<canvas id="dial1" width="200" height="200" style="background-color:#333"></canvas>
-<canvas id="dial2" width="200" height="200" style="background-color:#333"></canvas>
-<canvas id="dial3" width="200" height="200" style="background-color:#333"></canvas>
+<!--<canvas id="dial1" width="200" height="200" style="background-color:#333"></canvas>-->
+<div id="dials">No dials added yet!</div>
+
+
+<br>
+
+<!--<img src="http://rax1.bsn.net/mjpg/video.mjpg" style="width:800px;height:500px;"/>-->
 
 <br>
 
@@ -27,13 +31,13 @@
 <hr>
 <div style="background-color:#ce7777">
 <p>
-<a href="./../index.html">Home</a>
+<a href="index.html">Home</a>
         
-<a href="./presentState.html">State Data</a>
+<a href="presentState.html">State Data</a>
         
-<a href="./calibration.html">Calibration</a>
+<a href="calibration.html">Calibration</a>
         
-<a href="./driverView.html">Driver View</a>
+<a href="driverView.html">Driver View</a>
 </p>
 </div>
 <!-- END Common navigation bar -->
@@ -43,35 +47,53 @@
 <script>
 var dataSocket = new WebSocket("ws://127.0.0.1:8080/driverviewstream")
 var numTransmissions = 0;
+var dials = [];
 
 
 //Class for a dial
 
-var casseroleDial = function(elementID, min_in, max_in, step_in, name_in) {
+var casseroleDial = function(elementID_in, min_in, max_in, step_in, name_in) {
     this.min = min_in;
     this.max = max_in;
     this.step = step_in;
     this.name = name_in;
     this.value = min_in;
-    this.canvas = document.getElementById(elementID);
+    this.elementID = elementID_in;
+    
+    this.handcolor = "#333";
+    this.bgcolor = "white";
+    this.init();
+
+}
+
+casseroleDial.prototype.init = function(){
+    this.canvas = document.getElementById(this.elementID);
     this.ctx = this.canvas.getContext("2d");
     this.radius = this.canvas.height / 2;
     this.ctx.translate(this.radius, this.radius);
     this.radius = this.radius * 0.90;
-    this.drawDial();
+    this.drawFullDial();
 }
 
 casseroleDial.prototype.setValue = function(new_value){
+    this.undrawHand();
+    this.undrawValue();
     this.value = new_value;
     this.drawHand();
     this.drawValue();
 }
 
-casseroleDial.prototype.drawDial = function() {
+casseroleDial.prototype.drawFullDial = function() {
+    //draw constant parts of the dial
     this.drawFace();
-    this.drawNumbers()
-    this.drawHand();
+    this.drawNumbers();
     this.drawName();
+    
+    //Save the constant parts
+    this.ctx.save(); 
+    
+    //draw the variable parts of the dial
+    this.drawHand();
     this.drawValue();
 }
 
@@ -80,31 +102,27 @@ casseroleDial.prototype.drawFace = function() {
 
     this.ctx.beginPath();
     this.ctx.arc(0, 0, this.radius, 0.75*Math.PI, 2.25*Math.PI);
-    this.ctx.fillStyle = 'white';
+    this.ctx.fillStyle = this.bgcolor;
     this.ctx.fill();
 
     grad = this.ctx.createRadialGradient(0,0,this.radius*0.95, 0,0,this.radius*1.05);
-    grad.addColorStop(0, '#333');
-    grad.addColorStop(0.5, 'white');
-    grad.addColorStop(1, '#333');
+    grad.addColorStop(0, this.handcolor);
+    grad.addColorStop(0.5, this.bgcolor);
+    grad.addColorStop(1, this.handcolor);
     this.ctx.strokeStyle = grad;
     this.ctx.lineWidth = this.radius*0.1;
     this.ctx.stroke();
-
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, this.radius*0.1, 0, 2*Math.PI);
-    this.ctx.fillStyle = '#333';
-    this.ctx.fill();
 }
 
 casseroleDial.prototype.drawNumbers = function() {
     var ang;
     var num;
-    this.ctx.font = this.radius*0.15 + "px arial";
+    this.ctx.font = "bold " + this.radius*0.15 + "px arial";
     this.ctx.textBaseline="middle";
     this.ctx.textAlign="center";
+    this.ctx.fillStyle=this.handcolor;
     for(num= this.min; num <= this.max; num+=this.step){
-        ang = (num/this.step * (this.step/(this.max-this.min)) * (1.5*Math.PI))  + 1.25*Math.PI;
+        ang = ((num-this.min)/(this.max-this.min)) * (1.5*Math.PI)  + 1.25*Math.PI;
         this.ctx.rotate(ang);
         this.ctx.translate(0, -this.radius*0.85);
         this.ctx.rotate(-ang);
@@ -126,17 +144,45 @@ casseroleDial.prototype.drawName = function() {
 
 casseroleDial.prototype.drawValue = function() {
     this.ctx.translate(0, this.radius*0.4);
-    this.ctx.font=this.radius*0.18 + "px arial";
-    this.ctx.fillStyle="#00AA00";
+    this.ctx.font="bold " + this.radius*0.20 + "px arial";
+    this.ctx.fillStyle="#008877";
+    this.ctx.fillText(this.value.toString(), 0, 0);
+    this.ctx.translate(0, -this.radius*0.4);
+
+} 
+
+casseroleDial.prototype.undrawValue = function() {
+    this.ctx.translate(0, this.radius*0.4);
+    this.ctx.font="bold " + this.radius*0.2 + "px arial";
+    this.ctx.fillStyle=this.bgcolor;
     this.ctx.fillText(this.value.toString(), 0, 0);
     this.ctx.translate(0, -this.radius*0.4);
 
 } 
 
 casseroleDial.prototype.drawHand = function() {
-    var pos = (this.value)/(this.max-this.min)*(1.5*Math.PI) + 1.25*Math.PI;
+    var pos = (this.value-this.min)/(this.max-this.min)*(1.5*Math.PI) + 1.25*Math.PI;
+    this.ctx.strokeStyle=this.handcolor;
     this.ctx.beginPath();
     this.ctx.lineWidth = this.radius*0.08;
+    this.ctx.lineCap = "round";
+    this.ctx.moveTo(0,0);
+    this.ctx.rotate(pos);
+    this.ctx.lineTo(0, -this.radius*0.7);
+    this.ctx.stroke();
+    this.ctx.rotate(-pos);
+    
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, this.radius*0.1, 0, 2*Math.PI);
+    this.ctx.fillStyle = this.handcolor;
+    this.ctx.fill();
+}
+
+casseroleDial.prototype.undrawHand = function() {
+    var pos = (this.value-this.min)/(this.max-this.min)*(1.5*Math.PI) + 1.25*Math.PI;
+    this.ctx.strokeStyle=this.bgcolor;
+    this.ctx.beginPath();
+    this.ctx.lineWidth = this.radius*0.10;
     this.ctx.lineCap = "round";
     this.ctx.moveTo(0,0);
     this.ctx.rotate(pos);
@@ -157,19 +203,51 @@ dataSocket.onerror = function (error) {
 };
 
 dataSocket.onmessage = function (event) {
-  genTable(event.data);
-  numTransmissions = numTransmissions + 1;
-  document.getElementById("id01").innerHTML = "Socket Open. RX Count:" + numTransmissions; 
+  var arr = JSON.parse(event.data);
+  var dialcounter = 0;
+  
+  if(arr.step == "initConfig"){
+    //initial setup of the things on the page
+    dialCanvasTexts = "";
+    
+    //Round 1 - HTML Setup
+    dialcounter = 0
+    for(i = 0; i < arr.obj_array.length; i++){
+        if(arr.obj_array[i].type == "dial"){
+            dialCanvasTexts += "<canvas id=\"dial"+ (dialcounter) +"\" width=\"200\" height=\"200\" style=\"background-color:#333\"></canvas>"
+            document.getElementById("dials").innerHTML = dialCanvasTexts;
+            dialcounter++;
+        } else if(arr.obj_array[i].type == "webcam"){
+         //TODO
+        }
+    }
+    //Round 2 - init the dials
+    dialcounter = 0
+    for(i = 0; i < arr.obj_array.length; i++){
+        if(arr.obj_array[i].type == "dial"){
+            dials.push(new casseroleDial("dial"+(dialcounter), arr.obj_array[i].min, arr.obj_array[i].max, arr.obj_array[i].step, arr.obj_array[i].name));
+            dialcounter++;
+        }
+    }
+    
+      
+    
+  } else if(arr.step == "valUpdate"){
+    dialcounter = 0;
+    for(i = 0; i < arr.obj_array.length; i++){
+        dials[dialcounter].setValue(arr.obj_array[i].value);
+        dialcounter++;
+    }
+  }
+  //ignore other messages
+  
+  
 };
 
 
 
 
 //Main Execution
-
-var testDial1 = new casseroleDial("dial1", 0, 200, 20, "Test Name #1 (RPM)");
-
-//testDial1.setValue(135.2)
 
 </script>
 

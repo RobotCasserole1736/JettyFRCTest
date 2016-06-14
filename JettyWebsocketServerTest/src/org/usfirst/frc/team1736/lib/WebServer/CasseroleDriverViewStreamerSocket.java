@@ -11,11 +11,11 @@ import java.util.Timer;
 
 public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
 	private java.util.Timer updater = new java.util.Timer(); 
-	private int updatePeriodMS = 1000; //default update rate of 1s 
+	private int updatePeriodMS = 100; //default update rate of 0.1s 
 	volatile int test_data;
 	
 	/**
-	 * Set the time between server broadcasts of current state. Default is 1 second. Faster update rates bog down both server and network.
+	 * Set the time between server broadcasts of current state. Default is 100 milliseconds. Faster update rates bog down both server and network.
 	 * @param in_period_ms Broadcast period in milliseconds.
 	 */
 	public void setUpdatePeriod(int in_period_ms){
@@ -24,18 +24,36 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
 	
     @Override
     public void onWebSocketText(String message) {
-        if (isConnected()) {
-            System.out.printf("Got client's message: [%s]%n", message);
-        }
+
     }
     
     @Override
     public void onWebSocketConnect(Session sess) {
 
     	super.onWebSocketConnect(sess);
-    	//On client connect, begin new task to braodcast data at 1 second intervals
-    	test_data = 0;
-    	updater.scheduleAtFixedRate(new dataBroadcastTask(), 0, updatePeriodMS);
+    	//On client connect, broadcast the configuration which has been (presumably) set up already.
+        if (isConnected()) {
+            try {
+            	JSONObject full_obj = new JSONObject();
+            	JSONArray data_array = new JSONArray();
+            	
+            	//Package all data array elements into a JSON array
+            	for(JSONObject obj : CassesroleDriverView.driverView_objects){
+            		data_array.add(obj);
+            	}
+            	
+            	//package array into object
+            	full_obj.put("step", "initConfig");
+            	full_obj.put("obj_array", data_array);
+        		getRemote().sendString(full_obj.toJSONString());
+        		
+            } catch (IOException e) {
+                e.printStackTrace(System.err);
+            }
+        }
+        
+        //Start broadcassting data at the right rate. Delay a few period before broadcast start.
+    	updater.scheduleAtFixedRate(new dataBroadcastTask(), updatePeriodMS*10, updatePeriodMS);
     }
     
     @Override
@@ -56,14 +74,19 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
             	JSONArray data_array = new JSONArray();
             	
             	//Package all data array elements into a JSON array
-            	for(JSONObject obj : CassesroleWebStates.data_array_elements){
-            		data_array.add(obj);
+            	int index = 0;
+            	for(String val : CassesroleDriverView.dial_vals.toArray(new String[CassesroleDriverView.dial_vals.size()])){
+            		JSONObject val_obj = new JSONObject();
+            		val_obj.put("index", index);
+            		val_obj.put("value", val);
+            		data_array.add(val_obj);
+            		index += 1;
             	}
             	
             	//package array into object
-            	full_obj.put("state_array", data_array);
+            	full_obj.put("step", "valUpdate");
+            	full_obj.put("obj_array", data_array);
         		getRemote().sendString(full_obj.toJSONString());
-        		test_data += 1;
         		
             } catch (IOException e) {
                 e.printStackTrace(System.err);

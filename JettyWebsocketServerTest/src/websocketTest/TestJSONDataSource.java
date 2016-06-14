@@ -1,6 +1,7 @@
 package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
+import org.usfirst.frc.team1736.lib.WebServer.CassesroleDriverView;
 import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
 
 public class TestJSONDataSource {
@@ -9,6 +10,8 @@ public class TestJSONDataSource {
 	public double TestData2;
 	public boolean TestBool;
 	
+	public int counter;
+	
 	public Calibration cal1;
 	public Calibration cal2;
 	
@@ -16,6 +19,7 @@ public class TestJSONDataSource {
 	public void startDataGeneration(){
 		cal1 = new Calibration("Cal1", 1.5, CassesroleWebStates.getCalWrangler(),-5,40.5);
 		cal2 = new Calibration("Cal2",87.23, CassesroleWebStates.getCalWrangler());
+		counter = 0;
 		
 		Thread dataGenThread = new Thread(new Runnable() {
 			@Override
@@ -25,14 +29,17 @@ public class TestJSONDataSource {
 					TestData2 = TestData1/2.0 + 4.0 + cal2.get();
 					TestBool = !TestBool;
 					
+					CassesroleDriverView.setDialValue("Test Val1 (RPM)", cal1.get()*Math.sin(counter/30.0)+cal2.get());
+					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
 					CassesroleWebStates.putBoolean("Test Boolean", TestBool);
 					
 					CassesroleWebStates.putString("Test String", "Very special things!");
 					
+					counter++;
 					try {
-						Thread.sleep(350);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

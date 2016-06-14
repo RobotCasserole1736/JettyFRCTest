@@ -33,17 +33,6 @@ public class CasseroleWebServer {
 	    resource_handler.setResourceBase(".");
 		server.insertHandler(resource_handler);
 		
-//		ServletHolder basicHolder = new ServletHolder("basic", new CasseroleBasicServlet());
-//		context.addServlet(basicHolder, "/basic");
-		
-//		ServletHolder pingHolder = new ServletHolder("ping", new CasserolePingServlet());
-//		context.addServlet(pingHolder, "/ping");
-		
-//		CasseroleWebpageFromFileServlet dataWebpage = new CasseroleWebpageFromFileServlet();
-//		dataWebpage.setFile("./testData.html");
-//		ServletHolder dataWebpageHolder = new ServletHolder("data", dataWebpage);
-//		context.addServlet(dataWebpageHolder, "/data");
-		
 		//StateStreamer - broadcasts present state of robot. RPM's, voltages, etc.
 		ServletHolder statestreamHolder = new ServletHolder("statestream", new CasseroleStateStreamerServlet());
 		context.addServlet(statestreamHolder, "/statestream");
@@ -51,6 +40,11 @@ public class CasseroleWebServer {
 		//CalStreamer - Handles calibration viewing and updating 
 		ServletHolder calstreamHolder = new ServletHolder("calstream", new CasseroleCalStreamerServlet());
 		context.addServlet(calstreamHolder, "/calstream");
+		
+		//CalStreamer - Handles calibration viewing and updating 
+		ServletHolder driverDatstreamHolder = new ServletHolder("driverviewstream", new CasseroleDriverViewStreamerServlet());
+		context.addServlet(driverDatstreamHolder, "/driverviewstream");
+		
 		
 		// Kick off server in brand new thread.
 		// Thanks to Team 254 for an example of how to do this!
