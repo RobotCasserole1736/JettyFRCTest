@@ -55,7 +55,8 @@ public class CalWrangler {
 	private final int NUM_COLUMNS = 2;
 	
 	public ArrayList<Calibration> registeredCals;
-	final String calFile = "C:\\Users\\Chris Gerth\\Desktop\\cal_setup.csv";
+	//final String calFile = "C:\\Users\\Chris Gerth\\Desktop\\cal_setup.csv";
+	final String calFile = "/U/calibration/present_cal.csv";
 	
 	/**
 	 * Constructor. Just does init on internal values.
