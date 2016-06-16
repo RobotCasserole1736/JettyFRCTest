@@ -55,12 +55,18 @@ dataSocket.onclose = function (error) {
 };
 
 dataSocket.onmessage = function (event) {
-  genTable(event.data);
+  var data = JSON.parse(event.data);
+  if(data.type == "msg"){
+    alert(data.msg_text);
+  } else if(data.type == "cal_vals"){
+    genTable(data);
+  }
 
 };
 
-function genTable(json_data) {
-    var arr = JSON.parse(json_data);
+
+function genTable(arr) {
+    
     var i;
     var out = "<table border=\"1\">";
     

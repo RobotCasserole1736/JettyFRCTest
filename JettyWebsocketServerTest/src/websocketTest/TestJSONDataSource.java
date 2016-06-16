@@ -19,6 +19,7 @@ public class TestJSONDataSource {
 	public void startDataGeneration(){
 		cal1 = new Calibration("Cal1", 1.5, CassesroleWebStates.getCalWrangler(),-5,40.5);
 		cal2 = new Calibration("Cal2",87.23, CassesroleWebStates.getCalWrangler());
+		CassesroleWebStates.getCalWrangler().loadCalValues();
 		counter = 0;
 		
 		Thread dataGenThread = new Thread(new Runnable() {
