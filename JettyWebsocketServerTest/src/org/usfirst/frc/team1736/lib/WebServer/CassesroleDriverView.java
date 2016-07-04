@@ -48,6 +48,24 @@ public class CassesroleDriverView {
 		return;
 	}
 	
+	public static void newNumeric(String name_in){
+		//Create new object
+		JSONObject new_obj = new JSONObject();
+		new_obj.put("type", "numeric");
+		new_obj.put("name", name_in);
+		driverView_objects.add(new_obj);
+		return;
+	}
+	
+	public static void newIndicator(String name_in){
+		//Create new object
+		JSONObject new_obj = new JSONObject();
+		new_obj.put("type", "indicator");
+		new_obj.put("name", name_in);
+		driverView_objects.add(new_obj);
+		return;
+	}
+	
 	//might be called from different threads, but all calls go to the web server thread.
 	public static synchronized void setDialValue(String name_in, double value_in){
 		int index = -1;
