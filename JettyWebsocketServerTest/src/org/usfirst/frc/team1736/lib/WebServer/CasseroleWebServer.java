@@ -38,10 +38,6 @@ public class CasseroleWebServer {
 		
 		//New server will be on the robot's address plus port 8080 (http://127.0.0.1:8080)
 		server = new Server(5805);
-<<<<<<< HEAD
-=======
-		
->>>>>>> merge_lib_updates
 		
 		//Set up classes which will handle web requests
 		//I'm not entirely certain how we'll make this work, but here's my first pass:
