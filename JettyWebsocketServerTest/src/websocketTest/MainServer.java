@@ -13,8 +13,6 @@ public class MainServer {
 
 	public static void main(String[] args) {
 		
-		CassesroleWebStates.setCalWrangler(wrangler);
-		
 		CassesroleDriverView.newDial("Test Val1 (RPM)", 0, 200, 25);
 		CassesroleDriverView.newDial("Test Val2 (ft/s)", -20, 20, 5);
 		CassesroleDriverView.newDial("Battery Volts", 0, 15, 1);
