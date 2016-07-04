@@ -9,6 +9,12 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import java.util.Timer;
 
+/**
+ * DESCRIPTION:
+ * <br>
+ * Private socket definition class that Jetty wants me to make public even though it doesn't actually have to be. Don't use this for anything unless you know preciisely what you are doing.
+ */
+
 public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
 	private java.util.Timer updater = new java.util.Timer(); 
 	private int updatePeriodMS = 100; //default update rate of 0.1s 
@@ -38,8 +44,8 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
             	JSONArray data_array = new JSONArray();
             	
             	//Package all data array elements into a JSON array
-            	for(JSONObject obj : CassesroleDriverView.driverView_objects){
-            		data_array.add(obj);
+            	for(String name : CasseroleDriverView.ordered_obj_name_list){
+            		data_array.add(CasseroleDriverView.driverView_objects.get(name));
             	}
             	
             	//package array into object
@@ -52,7 +58,7 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
             }
         }
         
-        //Start broadcassting data at the right rate. Delay a few period before broadcast start.
+        //Start broadcasting data at the right rate. Delay a few period before broadcast start.
     	updater.scheduleAtFixedRate(new dataBroadcastTask(), updatePeriodMS*10, updatePeriodMS);
     }
     
@@ -75,7 +81,7 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
             	
             	//Package all data array elements into a JSON array
             	int index = 0;
-            	for(String val : CassesroleDriverView.dial_vals.toArray(new String[CassesroleDriverView.dial_vals.size()])){
+            	for(String val : CasseroleDriverView.dial_vals.toArray(new String[CasseroleDriverView.dial_vals.size()])){
             		JSONObject val_obj = new JSONObject();
             		val_obj.put("index", index);
             		val_obj.put("value", val);
