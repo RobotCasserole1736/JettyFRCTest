@@ -9,6 +9,12 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import java.util.Timer;
 
+/**
+ * DESCRIPTION:
+ * <br>
+ * Private socket definition class that Jetty wants me to make public even though it doesn't actually have to be. Don't use this for anything unless you know preciisely what you are doing.
+ */
+
 public class CasseroleStateStreamerSocket extends WebSocketAdapter {
 	private java.util.Timer updater = new java.util.Timer(); 
 	private int updatePeriodMS = 1000; //default update rate of 1s 
@@ -56,10 +62,10 @@ public class CasseroleStateStreamerSocket extends WebSocketAdapter {
             	JSONArray data_array = new JSONArray();
             	
             	//Package all data array elements into a JSON array
-            	for(JSONObject obj : CassesroleWebStates.data_array_elements){
-            		data_array.add(obj);
+            	for(String name : CassesroleWebStates.ordered_state_name_list){
+            		data_array.add(CassesroleWebStates.data_array_elements.get(name));
             	}
-            	
+
             	//package array into object
             	full_obj.put("state_array", data_array);
         		getRemote().sendString(full_obj.toJSONString());

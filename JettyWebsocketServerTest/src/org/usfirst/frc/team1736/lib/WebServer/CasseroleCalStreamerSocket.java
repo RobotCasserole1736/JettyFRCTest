@@ -11,6 +11,12 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import java.util.Timer;
 
+/**
+ * DESCRIPTION:
+ * <br>
+ * Private socket definition class that Jetty wants me to make public even though it doesn't actually have to be. Don't use this for anything unless you know preciisely what you are doing.
+ */
+
 public class CasseroleCalStreamerSocket extends WebSocketAdapter {
 	volatile int test_data;
 	
@@ -19,7 +25,11 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
     public void onWebSocketText(String message) {
         if (isConnected()) {
         	if(message.equals("save")){
-        		
+        		if(CalWrangler.saveCalValues() != 0){
+        			broadcastMsg("Error! Cannot write to cal file.");
+        		} else {
+        			broadcastMsg("Success! Cal file re-written.");
+        		}
         	} else {
         		String[] messageParts = message.split(":");
         		//Parse 3-part messages
@@ -28,7 +38,7 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
         			String name = messageParts[1];
         			double val = Double.parseDouble(messageParts[2]);
         			if(cmd.equals("set")){
-	        			Calibration cal_to_update = CassesroleWebStates.getCalWrangler().getCalFromName(name);
+	        			Calibration cal_to_update = CalWrangler.getCalFromName(name);
 	        			if(!Double.isFinite(val)){
 	        				System.out.println("ERROR: CalStreamer: Invalid value recieved " + Double.toString(val));
 	        			} else {
@@ -40,7 +50,7 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
         			String cmd = messageParts[0];
         			String name = messageParts[1];
         			if(cmd.equals("reset")){
-	        			Calibration cal_to_update = CassesroleWebStates.getCalWrangler().getCalFromName(name);
+	        			Calibration cal_to_update = CalWrangler.getCalFromName(name);
 	        			cal_to_update.reset();
         			}
         		} else {
@@ -66,11 +76,27 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
     }
     
 	/**
+	 * send a string message over the socket to notify the user of something.
+	 */
+	public void broadcastMsg(String msg) {
+        try {
+        	JSONObject full_obj = new JSONObject();
+        	//package array into object
+        	full_obj.put("type", "msg");
+        	full_obj.put("msg_text", msg);
+    		getRemote().sendString(full_obj.toJSONString());
+		
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+        }
+	}
+    
+	/**
 	 * send socket data out to client
 	 */
 	public void broadcastData() {
         if (isConnected()) {
-        	Calibration[] allCals = CassesroleWebStates.getCalWrangler().registeredCals.toArray(new Calibration[CassesroleWebStates.getCalWrangler().registeredCals.size()]);
+        	Calibration[] allCals = CalWrangler.registeredCals.toArray(new Calibration[CalWrangler.registeredCals.size()]);
         	
             try {
             	JSONObject full_obj = new JSONObject();
@@ -89,6 +115,7 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
             	}
             	
             	//package array into object
+            	full_obj.put("type", "cal_vals");
             	full_obj.put("cal_array", data_array);
         		getRemote().sendString(full_obj.toJSONString());
         		
