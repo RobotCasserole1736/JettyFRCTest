@@ -17,7 +17,7 @@ public class MainServer {
 		CassesroleDriverView.newDial("Test Val2 (ft/s)", -20, 20, 5);
 		CassesroleDriverView.newDial("Battery Volts", 0, 15, 1);
 		CassesroleDriverView.newWebcam("http://rax1.bsn.net/mjpg/video.mjpg");
-		
+
 		datasource.startDataGeneration();
 		webserver.startServer();
 

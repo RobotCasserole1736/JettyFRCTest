@@ -34,7 +34,7 @@ public class CasseroleWebServer {
 	 */
 	public void startServer(){
 		
-		final boolean LOCAL_PC_DEBUG_PATHS = false;
+		final boolean LOCAL_PC_DEBUG_PATHS = true;
 		
 		//New server will be on the robot's address plus port 8080 (http://127.0.0.1:8080)
 		server = new Server(5805);
