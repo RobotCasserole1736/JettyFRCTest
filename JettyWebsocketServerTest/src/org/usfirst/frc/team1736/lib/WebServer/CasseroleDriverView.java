@@ -30,11 +30,11 @@ import org.usfirst.frc.team1736.lib.Calibration.CalWrangler;
 public class CasseroleDriverView {
 	/** The list of objects which are broadcast. Must be volatile to ensure atomic accesses */
 	static volatile Hashtable<String, JSONObject> driverView_objects = new Hashtable<String, JSONObject>();
-	static volatile List<String> dial_vals = new ArrayList<String>();
+	static volatile List<String> obj_vals = new ArrayList<String>();
 	static volatile List<String> ordered_obj_name_list = new ArrayList<String>(); //Used to help preserve the order the user creates the dials in, since the hash table destroys this info
 	
-	static int num_dials = 0;
-	
+	static int num_sendable_objs = 0;
+
 	static final String VAL_DISPLAY_FORMATTER = "%5.2f";
 	
 	/**
@@ -44,10 +44,14 @@ public class CasseroleDriverView {
 	 * @param max_in Maximum value displayed on the dial.
 	 * @param step_in Step value between dial tick marks.
 	 */
-	public static void newDial(String name_in, double min_in, double max_in, double step_in){
+	public static void newDial(String name_in, double min_in, double max_in, double step_in, double min_acceptable_in, double max_acceptable_in){
 		//Sanitize user inputs
 		if(min_in >= max_in){
 			System.out.println("WARNING: new dial " + name_in + " has min value greater than maximum. Not adding dial.");
+			return;
+		}
+		if(min_acceptable_in >= max_acceptable_in){
+			System.out.println("WARNING: new dial " + name_in + " has an acceptable min value greater than maximum. Not adding dial.");
 			return;
 		}
 		if(max_in-min_in <= step_in){
@@ -58,14 +62,16 @@ public class CasseroleDriverView {
 		JSONObject new_obj = new JSONObject();
 		new_obj.put("type", "dial");
 		new_obj.put("name", name_in);
-		new_obj.put("index", num_dials);
+		new_obj.put("index", num_sendable_objs);
 		new_obj.put("min", min_in);
 		new_obj.put("max", max_in);
+		new_obj.put("min_acceptable", min_acceptable_in);
+		new_obj.put("max_acceptable", max_acceptable_in);
 		new_obj.put("step", step_in);
-		dial_vals.add(String.format(VAL_DISPLAY_FORMATTER, min_in));
+		obj_vals.add(String.format(VAL_DISPLAY_FORMATTER, min_in));
 		driverView_objects.put(name_in, new_obj);
 		ordered_obj_name_list.add(name_in);
-		num_dials += 1;
+		num_sendable_objs += 1;
 		return;
 	}
 	
@@ -86,6 +92,40 @@ public class CasseroleDriverView {
 	}
 	
 	/**
+	 * Create a new String to display on the driver view webpage.  Should be called at init, as new string values cannot be added at runtime.
+	 * @param name_in Name of the value to display. Also used to reference the value when updating it.
+	 */
+	public static void newStringBox(String name_in){
+		//Create new object
+		JSONObject new_obj = new JSONObject();
+		new_obj.put("type", "stringbox");
+		new_obj.put("name", name_in);
+		new_obj.put("index", num_sendable_objs);
+		obj_vals.add("N/A");
+		driverView_objects.put(name_in, new_obj);
+		ordered_obj_name_list.add(name_in);
+		num_sendable_objs += 1;
+		return;
+	}
+	
+	/**
+	 * Create a new Boolean indicator to display on the driver view webpage.  Should be called at init, as new indicators values cannot be added at runtime.
+	 * @param name_in Name of the value to display. Also used to reference the value when updating it.
+	 */
+	public static void newBoolean(String name_in){
+		//Create new object
+		JSONObject new_obj = new JSONObject();
+		new_obj.put("type", "boolean");
+		new_obj.put("name", name_in);
+		new_obj.put("index", num_sendable_objs);
+		obj_vals.add("N/A");
+		driverView_objects.put(name_in, new_obj);
+		ordered_obj_name_list.add(name_in);
+		num_sendable_objs += 1;
+		return;
+	}
+	
+	/**
 	 * Display a new value on an existing dial at runtime
 	 * @param name_in Name of the dial to update
 	 * @param value_in Value to display on the dial. Should be in the min/max range assigned for the dial, or the displayed value will be truncated.
@@ -93,17 +133,52 @@ public class CasseroleDriverView {
 	//might be called from different threads, but all calls go to the web server thread.
 	public static synchronized void setDialValue(String name_in, double value_in){
 		int index = -1;
-		
-		
 		if(driverView_objects.containsKey(name_in)){
 			JSONObject obj_tmp = driverView_objects.get(name_in);
 			index = (int) obj_tmp.get("index");
-			dial_vals.set(index, String.format(VAL_DISPLAY_FORMATTER, Math.min((double)obj_tmp.get("max"), Math.max((double)obj_tmp.get("min"), value_in))));
+			obj_vals.set(index, String.format(VAL_DISPLAY_FORMATTER, Math.min((double)obj_tmp.get("max"), Math.max((double)obj_tmp.get("min"), value_in))));
 			return;
 		}
-		
 		//If we get here, it means we didn't find the value
 		System.out.println("WARNING: could not find a dial value for " + name_in + ". No value set.");
+		return;
+	}
+	
+	/**
+	 * Display a new value on an existing string box at runtime
+	 * @param name_in Name of the dial to update
+	 * @param value_in Value to display on the dial. Should be in the min/max range assigned for the dial, or the displayed value will be truncated.
+	 */
+	//might be called from different threads, but all calls go to the web server thread.
+	public static synchronized void setStringBox(String name_in, String value_in){
+		int index = -1;
+		if(driverView_objects.containsKey(name_in)){
+			JSONObject obj_tmp = driverView_objects.get(name_in);
+			index = (int) obj_tmp.get("index");
+			obj_vals.set(index, value_in);
+			return;
+		}
+		//If we get here, it means we didn't find the value
+		System.out.println("WARNING: could not find a string box for " + name_in + ". No value set.");
+		return;
+	}
+	
+	/**
+	 * Display a new value on an existing boolean display
+	 * @param name_in Name of the dial to update
+	 * @param value_in Value to display on the dial. Should be in the min/max range assigned for the dial, or the displayed value will be truncated.
+	 */
+	//might be called from different threads, but all calls go to the web server thread.
+	public static synchronized void setBoolean(String name_in, boolean value_in){
+		int index = -1;
+		if(driverView_objects.containsKey(name_in)){
+			JSONObject obj_tmp = driverView_objects.get(name_in);
+			index = (int) obj_tmp.get("index");
+			obj_vals.set(index, value_in?"1":"0");
+			return;
+		}
+		//If we get here, it means we didn't find the value
+		System.out.println("WARNING: could not find a boolean for for " + name_in + ". No value set.");
 		return;
 	}
 

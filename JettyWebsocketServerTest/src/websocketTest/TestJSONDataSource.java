@@ -1,7 +1,7 @@
 package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
-import org.usfirst.frc.team1736.lib.WebServer.CassesroleDriverView;
+import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
 import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
 
 public class TestJSONDataSource {
@@ -29,7 +29,7 @@ public class TestJSONDataSource {
 					TestData2 = TestData1/2.0 + 4.0 + cal2.get();
 					TestBool = !TestBool;
 					
-					CassesroleDriverView.setDialValue("Test Val1 (RPM)", cal1.get()*Math.sin(counter/30.0)+cal2.get());
+					CasseroleDriverView.setDialValue("Test Val1 RPM", cal1.get()*Math.sin(counter/30.0)+cal2.get());
 					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
