@@ -16,6 +16,17 @@ This is the data log viewing interface
 </p>
 </div>
 
+<!-- Select file from robot -->
+<select name="s1">
+      <option value="" selected="selected">-----</option>
+  <?php 
+       foreach(glob(dirname(__FILE__) . 'highcharts/*') as $filename){
+       $filename = basename($filename);
+       echo "<option value='" . $filename . "'>".$filename."</option>";
+    }
+?>
+</select> 
+
 <div id="container" style="width:100%; height:800px;"></div>
 
 <!-- Common navigation bar -->
