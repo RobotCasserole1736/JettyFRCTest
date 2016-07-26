@@ -12,13 +12,8 @@ public class MainServer {
 	static CalWrangler wrangler = new CalWrangler();
 
 	public static void main(String[] args) {
-		
-		CasseroleDriverView.newDial("Test Val1 RPM", 0, 200, 25, 55, 130);
-		CasseroleDriverView.newDial("Test Val2 ft/s", -20, 20, 5, -3, 3);
-		CasseroleDriverView.newDial("Battery Volts", 0, 15, 1, 10.5, 13.5);
-		CasseroleDriverView.newWebcam("Test WebCam", "http://rax1.bsn.net/mjpg/video.mjpg");
-		CasseroleDriverView.newBoolean("TestBool");
 
+		datasource.initDataGeneration();
 		datasource.startDataGeneration();
 		webserver.startServer();
 
