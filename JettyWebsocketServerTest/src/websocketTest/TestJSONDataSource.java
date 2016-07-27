@@ -21,12 +21,13 @@ public class TestJSONDataSource {
 		CasseroleDriverView.newDial("Test Val2 ft/s", -20, 20, 5, -3, 3);
 		CasseroleDriverView.newDial("Battery Volts", 0, 15, 1, 10.5, 13.5);
 		CasseroleDriverView.newWebcam("Test WebCam", "http://rax1.bsn.net/mjpg/video.mjpg");
-		CasseroleDriverView.newBoolean("TestBool");
+		//CasseroleDriverView.newBoolean("TestBool");
+		CasseroleDriverView.newStringBox("Test String");
 		
 	}
 	
 	public void startDataGeneration(){
-		cal1 = new Calibration("Cal1", 1.5,-5,40.5);
+		cal1 = new Calibration("Cal1", 1.5,-5,100);
 		cal2 = new Calibration("Cal2",87.23);
 		counter = 0;
 		
@@ -42,9 +43,10 @@ public class TestJSONDataSource {
 					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
-					CassesroleWebStates.putBoolean("Test Boolean", TestBool);
+					//CassesroleWebStates.putBoolean("Test Boolean", TestBool);
 					
 					CassesroleWebStates.putString("Test String", "Very special things!");
+					CasseroleDriverView.setStringBox("Test String", "Test value " + Integer.toString(counter));
 					
 					counter++;
 					try {

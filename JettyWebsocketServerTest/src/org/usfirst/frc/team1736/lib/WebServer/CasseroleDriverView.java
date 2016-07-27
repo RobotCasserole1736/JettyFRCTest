@@ -118,7 +118,7 @@ public class CasseroleDriverView {
 		new_obj.put("type", "boolean");
 		new_obj.put("name", name_in);
 		new_obj.put("index", num_sendable_objs);
-		obj_vals.add("N/A");
+		obj_vals.add("F");
 		driverView_objects.put(name_in, new_obj);
 		ordered_obj_name_list.add(name_in);
 		num_sendable_objs += 1;
