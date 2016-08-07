@@ -78,14 +78,20 @@ public class CasseroleDriverView {
 	/**
 	 * Add a new webcam to the driver view webpage. Should be called at init, as new webcams cannot be added at runtime.
 	 * @param url_in Web address of the motion JPEG stream from the camera.
+	 * @param marker_x X draw position of the crosshairs (in percent - 0% is full left, 100% is full right).
+	 * @param marker_y Y draw position of the crosshairs (in percent - 0% is full top,  100% is full bottom).
+	 * @param img_rotate_deg Degrees clockwise to rotate the image to be displayed. Crosshairs are drawn on top of the already-rotated image.
 	 * @param name_in Name of the web stream. Internal uses only, currently...
 	 */
-	public static void newWebcam(String name_in, String url_in){
+	public static void newWebcam(String name_in, String url_in, double marker_x, double marker_y, double img_rotate_deg){
 		//Create new object
 		JSONObject new_obj = new JSONObject();
 		new_obj.put("type", "webcam");
 		new_obj.put("name", name_in);
 		new_obj.put("url", url_in);
+		new_obj.put("targ_x_pct", marker_x);
+		new_obj.put("targ_y_pct", marker_y);
+		new_obj.put("rotation_deg", img_rotate_deg);
 		driverView_objects.put(name_in, new_obj);
 		ordered_obj_name_list.add(name_in);
 		return;

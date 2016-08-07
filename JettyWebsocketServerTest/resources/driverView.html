@@ -5,12 +5,10 @@
 
 <head>
   <link rel="stylesheet" href="main.css">
-</head>http://localhost:5805/driverView.html
+</head>
 
 <body>
 
-<h1>FRC 1736 Driver View</h1>
-<hr>
 <div/>
 <div id="id01">COM Status: Socket Not Open</div>
 <br>
@@ -250,15 +248,15 @@ casseroleStringBox.prototype.init = function(){
     this.valueBoxX = this.canvas.width*0.025;  
     this.valueBoxY = this.canvas.height*0.1;  
     this.valueBoxWidth  = this.canvas.width  * 0.95;  
-    this.valueBoxHeight = this.canvas.height * 0.3;  
-    this.valueTextY = this.valueBoxY + (this.valueBoxHeight*0.75);
+    this.valueBoxHeight = this.canvas.height * 0.4;  
+    this.valueTextY = this.valueBoxY + (this.valueBoxHeight*0.85);
 	this.valueTextX = this.valueBoxX*2;
     
     this.nameBoxX = this.canvas.width*0.025;  
-    this.nameBoxY = this.canvas.height* 0.650;  
+    this.nameBoxY = this.canvas.height* 0.550;  
     this.nameBoxWidth  = this.canvas.width  * 0.95;  
-    this.nameBoxHeight = this.canvas.height * 0.3;  
-    this.nameTextY = this.nameBoxY + (this.nameBoxHeight*0.75);
+    this.nameBoxHeight = this.canvas.height * 0.4;  
+    this.nameTextY = this.nameBoxY + (this.nameBoxHeight*0.85);
 	this.nameTextX = this.nameBoxX*2;
         
     this.textcolor = "#333";
@@ -269,7 +267,7 @@ casseroleStringBox.prototype.init = function(){
 casseroleStringBox.prototype.drawName = function(){
     this.ctx.fillStyle=this.bgcolor;
     this.ctx.fillRect(this.nameBoxX, this.nameBoxY, this.nameBoxWidth, this.nameBoxHeight );
-    this.ctx.font="bold " + this.nameBoxHeight*0.40 + "px arial";
+    this.ctx.font="bold " + this.nameBoxHeight*0.50 + "px arial";
     this.ctx.fillStyle=this.textcolor;
     this.ctx.fillText(this.name.toString(), this.nameTextX, this.nameTextY);
 
@@ -282,7 +280,7 @@ casseroleStringBox.prototype.drawValBox = function(){
 }
 
 casseroleStringBox.prototype.drawVal = function(){
-    this.ctx.font="bold " + this.valueBoxHeight*0.40 + "px arial";
+    this.ctx.font="bold " + this.valueBoxHeight*0.50 + "px arial";
     this.ctx.fillStyle=this.textcolor;
     this.ctx.fillText(this.value.toString(), this.valueTextX, this.valueTextY);
 }
@@ -440,16 +438,20 @@ dataSocket.onmessage = function (event) {
     dataElementCounter = 0
     for(i = 0; i < arr.obj_array.length; i++){
         if(arr.obj_array[i].type == "dial"){
-            dialCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"200\" height=\"200\" style=\"background-color:#333\"></canvas>"
+            dialCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"175\" height=\"175\" style=\"background-color:#333\"></canvas>"
             dataElementCounter++;
         } else if(arr.obj_array[i].type == "stringbox"){
-            stringboxCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"200\" height=\"100\" style=\"background-color:#333\"></canvas>"
+            stringboxCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"150\" height=\"75\" style=\"background-color:#333\"></canvas>"
             dataElementCounter++;
         } else if(arr.obj_array[i].type == "boolean"){
-            booleansCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"100\" height=\"100\" style=\"background-color:#333\"></canvas>"
+            booleansCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"75\" height=\"75\" style=\"background-color:#333\"></canvas>"
             dataElementCounter++;
         } else if(arr.obj_array[i].type == "webcam"){
-            webcamTexts += "<img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:300px;\"/>"    
+			var tgt_x_pct = arr.obj_array[i].targ_x_pct;
+			var tgt_y_pct = arr.obj_array[i].targ_y_pct;
+			var rotation = arr.obj_array[i].rotation_deg;
+			//Draw webcam plus crosshairs overlaid
+            webcamTexts += "<div id=\"outter\" style=\"position:relative;width:300px;height:300px;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:300px;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div>";    
         }
     }
 	

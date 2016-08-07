@@ -21,7 +21,7 @@ public class TestJSONDataSource {
 		CasseroleDriverView.newDial("Test Val1 RPM", 0, 200, 25, 55, 130);
 		CasseroleDriverView.newDial("Test Val2 ft/s", -20, 20, 5, -3, 3);
 		CasseroleDriverView.newDial("Battery Volts", 0, 15, 1, 10.5, 13.5);
-		CasseroleDriverView.newWebcam("Test WebCam", "http://plazacam.studentaffairs.duke.edu/mjpg/video.mjpg");
+		CasseroleDriverView.newWebcam("Test WebCam", "http://plazacam.studentaffairs.duke.edu/mjpg/video.mjpg", 50.0, 25.0, 90.0);
 		CasseroleDriverView.newBoolean("Test Bool Display 1", "red");
 		CasseroleDriverView.newBoolean("Test Bool Display 2", "green");
 		CasseroleDriverView.newBoolean("Test Bool Display 3", "yellow");
