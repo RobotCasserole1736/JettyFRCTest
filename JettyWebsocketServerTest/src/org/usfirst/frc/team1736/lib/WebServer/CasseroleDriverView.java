@@ -80,7 +80,7 @@ public class CasseroleDriverView {
 	 * @param url_in Web address of the motion JPEG stream from the camera.
 	 * @param name_in Name of the web stream. Internal uses only, currently...
 	 */
-	public static void newWebcam(String url_in, String name_in){
+	public static void newWebcam(String name_in, String url_in){
 		//Create new object
 		JSONObject new_obj = new JSONObject();
 		new_obj.put("type", "webcam");
@@ -112,13 +112,14 @@ public class CasseroleDriverView {
 	 * Create a new Boolean indicator to display on the driver view webpage.  Should be called at init, as new indicators values cannot be added at runtime.
 	 * @param name_in Name of the value to display. Also used to reference the value when updating it.
 	 */
-	public static void newBoolean(String name_in){
+	public static void newBoolean(String name_in, String color_in){
 		//Create new object
 		JSONObject new_obj = new JSONObject();
 		new_obj.put("type", "boolean");
 		new_obj.put("name", name_in);
+		new_obj.put("color", color_in);
 		new_obj.put("index", num_sendable_objs);
-		obj_vals.add("F");
+		obj_vals.add("False");
 		driverView_objects.put(name_in, new_obj);
 		ordered_obj_name_list.add(name_in);
 		num_sendable_objs += 1;
@@ -166,7 +167,7 @@ public class CasseroleDriverView {
 	/**
 	 * Display a new value on an existing boolean display
 	 * @param name_in Name of the dial to update
-	 * @param value_in Value to display on the dial. Should be in the min/max range assigned for the dial, or the displayed value will be truncated.
+	 * @param value_in Value to display on the indicator.
 	 */
 	//might be called from different threads, but all calls go to the web server thread.
 	public static synchronized void setBoolean(String name_in, boolean value_in){
