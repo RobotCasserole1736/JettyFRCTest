@@ -43,15 +43,19 @@ public class TestJSONDataSource {
 					TestData3 = cal1.get()*Math.sin(counter/cal2.get())+50;
 					TestBool = TestData3 > 87.0;
 					
-					CasseroleDriverView.setDialValue("Test Val1 RPM", TestData3);
+					
 					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
 					CassesroleWebStates.putBoolean("Test Boolean", TestBool);
 					
 					CassesroleWebStates.putString("Test String", "Very special things!");
-					CasseroleDriverView.setStringBox("Test String", "Test value " + Integer.toString(counter));
 					
+					
+					CasseroleDriverView.setDialValue("Test Val1 RPM", TestData3);
+					CasseroleDriverView.setDialValue("Test Val2 ft/s", 5.0);
+					CasseroleDriverView.setDialValue("Battery Volts", (counter/5.0) % 12);
+					CasseroleDriverView.setStringBox("Test String", "Test value " + Integer.toString(counter));
 					CasseroleDriverView.setBoolean("Test Bool Display 1", TestData3 > 45.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 2", TestData3 > 50.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
