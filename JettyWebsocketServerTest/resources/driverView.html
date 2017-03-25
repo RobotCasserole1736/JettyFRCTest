@@ -291,7 +291,7 @@ dataSocket.onmessage = function (event) {
   } else if(arr.step == "valUpdate"){
     dialcounter = 0;
     for(i = 0; i < arr.obj_array.length; i++){
-        dials[dialcounter].setValue(arr.obj_array[i].value);
+        dials[dialcounter].setValue(arr.obj_array[i].value); <!--it does not like this line at all-->
         dialcounter++;
     }
   }
