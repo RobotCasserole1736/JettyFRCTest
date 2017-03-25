@@ -8,6 +8,20 @@
 </head>
 
 <body>
+<script>
+function handleApplyButtonClick(input_box){
+    var val_string = input_box.value;
+    var val = parseFloat(val_string);
+    
+    if(val == NaN){
+        document.getElementById("id01").innerHTML = "Error: " + val_string + " is not a number!";
+    } else {
+        dataSocket.send("set:"+input_box.name+":"+val); 
+    }
+
+}
+</script>
+
 
 <h1>FRC 1736 Driver View</h1>
 <hr>
@@ -18,6 +32,22 @@
 <div id="dials"></div>
 <br>
 
+<div id="dropdowns">
+<table>
+<tr>
+<td><select id=auton_select>
+  <option value="volvo">Volvo</option>
+  <option value="saab">Saab</option>
+  <option value="mercedes">Mercedes</option>
+  <option value="audi">Audi</option>
+</select></td>
+<script>out += "<tr><td>" +
+ auton_select.cur_val  + "</td>" </script> 
+<td><button id=_submit_btn type=button onclick=handleApplyButtonClick(auton_select)\>Apply</button></td>
+
+</tr></table>
+</div>
+<br>
 
 <div id="webcams"></div>
 <br>
