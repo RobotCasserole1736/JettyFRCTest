@@ -5,7 +5,7 @@ var hostname = "localhost:5805" //Local Hostname
 
 var dataSocket = new WebSocket("ws://"+hostname+"/driverviewstream")
 var numTransmissions = 0;
-var display_objs = [];
+var display_objs = {};
 
 //Class for a dial
 
@@ -354,9 +354,9 @@ casseroleBooleanDisplay.prototype.drawWrapText = function(text, x, y, maxWidth, 
 }
 
 casseroleBooleanDisplay.prototype.setValue = function(new_value){
-	if(new_value == "0"){
+	if(new_value == "False"){
 		this.value = false;
-	} else if (new_value == "1"){
+	} else if (new_value == "True"){
 		this.value = true;
 	}
 	//else, do nothing
@@ -385,10 +385,8 @@ dataSocket.onclose = function (error) {
 
 dataSocket.onmessage = function (event) {
   var arr = JSON.parse(event.data);
-  var dataElementCounter = 0;
-  var webcamElementCounter = 0;
   
-  if(arr.step == "initConfig"){
+  if(arr.step == "init"){
     //initial setup of the things on the page
     dialCanvasTexts = "";
 	stringboxCanvasTexts = "";
@@ -396,25 +394,19 @@ dataSocket.onmessage = function (event) {
     webcamTexts = "";
     
     //Part 1 - HTML Setup
-    dataElementCounter = 0
-    webcamElementCounter = 0
     for(i = 0; i < arr.obj_array.length; i++){
         if(arr.obj_array[i].type == "dial"){
-            dialCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"175\" height=\"175\" style=\"background-color:#333\"></canvas>"
-            dataElementCounter++;
+            dialCanvasTexts += "<canvas id=\"obj"+ (arr.obj_array[i].name) +"\" width=\"175\" height=\"175\" style=\"background-color:#333\"></canvas>"
         } else if(arr.obj_array[i].type == "stringbox"){
-            stringboxCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"150\" height=\"75\" style=\"background-color:#333\"></canvas>"
-            dataElementCounter++;
+            stringboxCanvasTexts += "<canvas id=\"obj"+ (arr.obj_array[i].name) +"\" width=\"150\" height=\"75\" style=\"background-color:#333\"></canvas>"
         } else if(arr.obj_array[i].type == "boolean"){
-            booleansCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"75\" height=\"75\" style=\"background-color:#333\"></canvas>"
-            dataElementCounter++;
+            booleansCanvasTexts += "<canvas id=\"obj"+ (arr.obj_array[i].name) +"\" width=\"75\" height=\"75\" style=\"background-color:#333\"></canvas>"
         } else if(arr.obj_array[i].type == "webcam"){
-			var tgt_x_pct = arr.obj_array[i].targ_x_pct;
-			var tgt_y_pct = arr.obj_array[i].targ_y_pct;
+			var tgt_x_pct = arr.obj_array[i].marker_x;
+			var tgt_y_pct = arr.obj_array[i].marker_y;
 			var rotation = arr.obj_array[i].rotation_deg;
 			//Draw webcam plus crosshairs overlaid
-			webcamTexts += "<td><div id=\"outter\" style=\"position:relative;width:300px;height:auto;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:auto;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert"+ (webcamElementCounter) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz"+ (webcamElementCounter) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div></td>";    
-            webcamElementCounter++;
+			webcamTexts += "<td><div id=\"outter\" style=\"position:relative;width:300px;height:auto;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:auto;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert"+ (arr.obj_array[i].name) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz"+ (arr.obj_array[i].name) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div></td>";    
 		 }
     }
 	
@@ -425,33 +417,27 @@ dataSocket.onmessage = function (event) {
 	document.getElementById("dials").innerHTML = dialCanvasTexts;
     
     //Part 3 - init the data elements
-    dataElementCounter = 0
     for(i = 0; i < arr.obj_array.length; i++){
         if(arr.obj_array[i].type == "dial"){
-            display_objs.push(new casseroleDial("obj"+(dataElementCounter), arr.obj_array[i].min, arr.obj_array[i].max, arr.obj_array[i].min_acceptable, arr.obj_array[i].max_acceptable, arr.obj_array[i].step, arr.obj_array[i].name));
-            dataElementCounter++;
+            display_objs[arr.obj_array[i].name] = (new casseroleDial("obj"+(arr.obj_array[i].name), arr.obj_array[i].min, arr.obj_array[i].max, arr.obj_array[i].min_acceptable, arr.obj_array[i].max_acceptable, arr.obj_array[i].step, arr.obj_array[i].displayName));
         } else if(arr.obj_array[i].type == "stringbox") {
-			display_objs.push(new casseroleStringBox("obj"+(dataElementCounter), arr.obj_array[i].name));
-            dataElementCounter++;
+			display_objs[arr.obj_array[i].name] = (new casseroleStringBox("obj"+(arr.obj_array[i].name), arr.obj_array[i].displayName));
         } else if(arr.obj_array[i].type == "boolean") {
-			display_objs.push(new casseroleBooleanDisplay("obj"+(dataElementCounter), arr.obj_array[i].name, arr.obj_array[i].color));
-            dataElementCounter++;
+			display_objs[arr.obj_array[i].name] = (new casseroleBooleanDisplay("obj"+(arr.obj_array[i].name), arr.obj_array[i].displayName, arr.obj_array[i].color));
 		} 
 		//ignore other types
     }
 	
 
   } else if(arr.step == "valUpdate"){
-    dataElementCounter = 0;
     for(i = 0; i < arr.obj_array.length; i++){
-        display_objs[dataElementCounter].setValue(arr.obj_array[i].value);
-        dataElementCounter++;
-    }
-    webcamElementCounter = 0;
-    for(i = 0; i < arr.webcam_array.length/2; i++){
-        document.getElementById("crosshair_vert"+webcamElementCounter).setAttribute("style",  "background:red;position:absolute;top:"+arr.webcam_array[i].value_y+"%;left:"+arr.webcam_array[i].value_x+"%;width:2px;height:30px;transform:translate(-50%, -50%)");
-        document.getElementById("crosshair_horiz"+webcamElementCounter).setAttribute("style", "background:white;position:absolute;top:"+arr.webcam_array[i].value_y+"%;left:"+arr.webcam_array[i].value_x+"%;width:30px;height:2px;transform:translate(-50%, -50%)");
-        webcamElementCounter++;
+        if(arr.obj_array[i].type == "webcam"){
+            document.getElementById("crosshair_vert"+arr.obj_array[i].name).setAttribute("style",  "background:red;position:absolute;top:"+arr.obj_array[i].marker_y+"%;left:"+arr.obj_array[i].marker_x+"%;width:2px;height:30px;transform:translate(-50%, -50%)");
+            document.getElementById("crosshair_horiz"+arr.obj_array[i].name).setAttribute("style", "background:white;position:absolute;top:"+arr.obj_array[i].marker_y+"%;left:"+arr.obj_array[i].marker_x+"%;width:30px;height:2px;transform:translate(-50%, -50%)");
+        } else {
+            display_objs[arr.obj_array[i].name].setValue(arr.obj_array[i].value);
+        }
+
     }
   }
   //ignore other messages
