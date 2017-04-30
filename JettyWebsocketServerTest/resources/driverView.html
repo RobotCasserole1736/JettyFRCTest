@@ -9,8 +9,9 @@
 
 <body>
 
+
 <div/>
-<div align="center" id="id01">COM Status: Socket Not Open</div>
+<div align="center" id="id01">COM Status: Socket Not Yet Opened...</div>
 <br>
 
 <div align="center" id="dials"></div>
@@ -22,9 +23,7 @@
 <div align="center" id="stringboxes"></div>
 <br>
 
-
-
-<div align="center" ><table><tr id="webcams"></tr></table></div>
+<div align="center"><table><tr id="webcams"></tr></table></div>
 <br>
 
 
@@ -32,7 +31,7 @@
 <hr>
 <div style="background-color:#ce7777">
 <p>
-<a href="index.html">Home  </a>
+<a href="index.html">Home</a>
         
 <a href="presentState.html">State Data</a>
         
@@ -40,7 +39,7 @@
         
 <a href="driverView.html">Driver View</a>
 
-<a href="dataViewer.html">Data Viewer</a>
+<a href="ControllerMap.html">Controller Map</a>
 </p>
 </div>
 <!-- END Common navigation bar -->
@@ -48,10 +47,9 @@
 
 
 <script>
-var dataSocket = new WebSocket("ws://127.0.0.1:5805/driverviewstream")
+var dataSocket = new WebSocket("ws://roboRIO-1736-FRC.local:5805/driverviewstream")
 var numTransmissions = 0;
 var display_objs = [];
-
 
 //Class for a dial
 
@@ -351,7 +349,6 @@ casseroleBooleanDisplay.prototype.init = function(){
 		this.textOffColor = "#2A662A";
 		this.textOnColor = "#A9FFA9";
 	}
-		
 
     this.bgcolor = "#BBBBBB";
     
@@ -421,12 +418,19 @@ dataSocket.onopen = function (event) {
 };
 
 dataSocket.onerror = function (error) {
-  document.getElementById("id01").innerHTML = "COM Status: Error with socket";
+  document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
+  alert("ERROR from Driver View: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
+};
+
+dataSocket.onclose = function (error) {
+  document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
+  alert("ERROR from Driver View: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
 dataSocket.onmessage = function (event) {
   var arr = JSON.parse(event.data);
   var dataElementCounter = 0;
+  var webcamElementCounter = 0;
   
   if(arr.step == "initConfig"){
     //initial setup of the things on the page
@@ -437,6 +441,7 @@ dataSocket.onmessage = function (event) {
     
     //Part 1 - HTML Setup
     dataElementCounter = 0
+    webcamElementCounter = 0
     for(i = 0; i < arr.obj_array.length; i++){
         if(arr.obj_array[i].type == "dial"){
             dialCanvasTexts += "<canvas id=\"obj"+ (dataElementCounter) +"\" width=\"175\" height=\"175\" style=\"background-color:#333\"></canvas>"
@@ -452,8 +457,9 @@ dataSocket.onmessage = function (event) {
 			var tgt_y_pct = arr.obj_array[i].targ_y_pct;
 			var rotation = arr.obj_array[i].rotation_deg;
 			//Draw webcam plus crosshairs overlaid
-            webcamTexts += "<td><div id=\"outter\" style=\"position:relative;width:300px;height:300px;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:300px;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div></td>";    
-        }
+			webcamTexts += "<td><div id=\"outter\" style=\"position:relative;width:300px;height:auto;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:auto;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert"+ (webcamElementCounter) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz"+ (webcamElementCounter) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div></td>";    
+            webcamElementCounter++;
+		 }
     }
 	
 	//Part 2 - update the HTML on the page
@@ -474,7 +480,7 @@ dataSocket.onmessage = function (event) {
         } else if(arr.obj_array[i].type == "boolean") {
 			display_objs.push(new casseroleBooleanDisplay("obj"+(dataElementCounter), arr.obj_array[i].name, arr.obj_array[i].color));
             dataElementCounter++;
-		}
+		} 
 		//ignore other types
     }
 	
@@ -484,6 +490,12 @@ dataSocket.onmessage = function (event) {
     for(i = 0; i < arr.obj_array.length; i++){
         display_objs[dataElementCounter].setValue(arr.obj_array[i].value);
         dataElementCounter++;
+    }
+    webcamElementCounter = 0;
+    for(i = 0; i < arr.webcam_array.length/2; i++){
+        document.getElementById("crosshair_vert"+webcamElementCounter).setAttribute("style",  "background:red;position:absolute;top:"+arr.webcam_array[i].value_y+"%;left:"+arr.webcam_array[i].value_x+"%;width:2px;height:30px;transform:translate(-50%, -50%)");
+        document.getElementById("crosshair_horiz"+webcamElementCounter).setAttribute("style", "background:white;position:absolute;top:"+arr.webcam_array[i].value_y+"%;left:"+arr.webcam_array[i].value_x+"%;width:30px;height:2px;transform:translate(-50%, -50%)");
+        webcamElementCounter++;
     }
   }
   //ignore other messages
@@ -500,4 +512,3 @@ dataSocket.onmessage = function (event) {
 
 </body>
 </html>
-

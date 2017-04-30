@@ -12,7 +12,7 @@
 <h1>Robot Calibrations</h1>
 <hr>
 <div/>
-<div id="id01">COM Status: Socket Not Open</div>
+<div id="id01">COM Status: Socket Not Yet Opened...</div>
 
 <br>
 
@@ -26,15 +26,13 @@
 <hr>
 <div style="background-color:#ce7777">
 <p>
-<a href="index.html">Home  </a>
+<a href="index.html">Home</a>
         
 <a href="presentState.html">State Data</a>
         
 <a href="calibration.html">Calibration</a>
         
 <a href="driverView.html">Driver View</a>
-
-<a href="dataViewer.html">Data Viewer</a>
 </p>
 </div>
 <!-- END Common navigation bar -->
@@ -42,18 +40,20 @@
 
 
 <script>
-var dataSocket = new WebSocket("ws://127.0.0.1:5805/calstream")
+var dataSocket = new WebSocket("ws://roboRIO-1736-FRC.local:5805/calstream");
 
 dataSocket.onopen = function (event) {
   document.getElementById("id01").innerHTML = "COM Status: Socket Opened.";
 };
 
 dataSocket.onerror = function (error) {
-  document.getElementById("id01").innerHTML = "COM Status: Error with socket!";
+  document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
+  alert("ERROR from Calibration: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
 dataSocket.onclose = function (error) {
-  document.getElementById("id01").innerHTML = "COM Status: Socket Closed.";
+  document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
+  alert("ERROR from Calibration: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
 dataSocket.onmessage = function (event) {
