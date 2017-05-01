@@ -19,160 +19,110 @@ var casseroleDial = function(elementID_in, min_in, max_in, min_acceptable_in, ma
     this.value = min_in;
     this.elementID = elementID_in;
     
-    this.handcolor = "#333";
-    this.bgcolor = "white";
-    this.init();
+   var chart = {      
+      type: 'solidgauge'
+   };
+   var title = this.name;
 
+   var pane = {
+      center: ['50%', '85%'],
+      size: '140%',
+      startAngle: -150,
+      endAngle: 150,
+      background: {
+         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+         innerRadius: '60%',
+         outerRadius: '100%',
+         shape: 'arc'
+      }
+   };
+
+   var tooltip = {
+      enabled: false
+   };
+      
+   // the value axis
+   var yAxis = {
+      stops: [
+         [this.min_acceptable, '#FF0000'], // red
+         [this.max_acceptable, '#00FF00'], // green
+         [this.max, '#FF0000'] // red
+      ],
+      lineWidth: 0,
+      minorTickInterval: null,
+      tickPixelInterval: 400,
+      tickWidth: 0,
+      title: {
+         y: -70
+      },
+      labels: {
+         y: 16
+      },
+	  min: this.min,
+      max: this.max,
+      title: {
+         text: this.name
+      }
+   };	  
+   
+   var plotOptions = {
+      solidgauge: {
+         dataLabels: {
+            y: 5,
+            borderWidth: 0,
+            useHTML: true
+         }
+      }
+   };
+   
+   var credits = {
+      enabled: false
+   };
+
+   var series = [{
+      name: this.name,
+      data: [80],
+      dataLabels: {
+         format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+         ((Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black') + '">{y}</span><br/>' +
+         '<span style="font-size:12px;color:silver">km/h</span></div>'
+      },
+      tooltip: {
+         valueSuffix: ' units'
+      }
+   }];
+	  
+   var json = {};   
+   json.chart = chart; 
+   json.title = title;       
+   json.pane = pane; 
+   json.tooltip = tooltip; 
+   json.yAxis = yAxis; 
+   json.credits = credits; 
+   json.series = series;     
+   //$("\""+this.elementID+"\"").highcharts(json);  
+
+    this.settings = json;
+
+    this.init();
 }
 
 casseroleDial.prototype.init = function(){
-    this.canvas = document.getElementById(this.elementID);
-    this.ctx = this.canvas.getContext("2d");
-    this.radius = this.canvas.height / 2;
-    this.ctx.translate(this.radius, this.radius);
-    this.radius = this.radius * 0.90;
-    this.drawFullDial();
+    //this.canvas = document.getElementById(this.elementID);
+    this.chart = Highcharts.chart(this.elementID, this.settings);
+    
+    
+    this.settings;
+
 }
 
-casseroleDial.prototype.convValToAngle = function(num_in){
-    return ((num_in-this.min)/(this.max-this.min)) * (1.5*Math.PI)  + 1.25*Math.PI;
-}
 
 casseroleDial.prototype.setValue = function(new_value){
     
-    //draw-over background This resets to a blank dial.
-    this.drawFace();
-    
-    this.value = new_value;
-    this.drawHand();
-    this.drawValue();
-    this.drawNumbers(); //Just in case the hand goes over the numbers
-    this.drawName();
+    this.chart.series[0].points[0].update(new_value);
+
 }
 
-casseroleDial.prototype.drawFullDial = function() {
-    //draw constant parts of the dial
-    this.drawFace();
-    this.drawNumbers();
-    this.drawName();
-    
-    
-    //draw the variable parts of the dial
-    this.drawHand();
-    this.drawValue();
-}
-
-casseroleDial.prototype.drawFace = function() {
-    var grad;
-    
-    min_acc_ang = this.convValToAngle(this.min_acceptable)-(0.5*Math.PI);
-    max_acc_ang = this.convValToAngle(this.max_acceptable)-(0.5*Math.PI);
-    
-
-    //min to min acceptable
-    this.ctx.beginPath();
-    this.ctx.moveTo(0,0);
-    this.ctx.arc(0, 0, this.radius, 0.75*Math.PI, min_acc_ang);
-    grad1 = this.ctx.createRadialGradient(0,0,this.radius*0.95, 0,0,this.radius*1.05);
-    grad1.addColorStop(0, this.handcolor);
-    grad1.addColorStop(0.5, "red");
-    grad1.addColorStop(1, this.handcolor);
-    this.ctx.strokeStyle = grad1;
-    this.ctx.lineWidth = this.radius*0.1;
-    this.ctx.stroke();
-    
-    //max acceptable to max 
-    this.ctx.beginPath();
-    this.ctx.moveTo(0,0);
-    this.ctx.arc(0, 0, this.radius, max_acc_ang, 2.25*Math.PI);
-    grad3 = this.ctx.createRadialGradient(0,0,this.radius*0.95, 0,0,this.radius*1.05);
-    grad3.addColorStop(0, this.handcolor);
-    grad3.addColorStop(0.5, "red");
-    grad3.addColorStop(1, this.handcolor);
-    this.ctx.strokeStyle = grad3;
-    this.ctx.lineWidth = this.radius*0.1;
-    this.ctx.stroke();
-    
-    //min acceptable to max acceptable
-    this.ctx.beginPath();
-    this.ctx.moveTo(0,0);
-    this.ctx.arc(0, 0, this.radius, min_acc_ang, max_acc_ang);
-    grad2 = this.ctx.createRadialGradient(0,0,this.radius*0.95, 0,0,this.radius*1.05);
-    grad2.addColorStop(0, this.handcolor);
-    grad2.addColorStop(0.5, "green");
-    grad2.addColorStop(1, this.handcolor);
-    this.ctx.strokeStyle = grad2;
-    this.ctx.lineWidth = this.radius*0.1;
-    this.ctx.stroke();
-
-    //White background
-    this.ctx.beginPath();
-    this.ctx.moveTo(0,0);
-    this.ctx.arc(0, 0, this.radius*0.94, 0.0*Math.PI, 2*Math.PI);
-    this.ctx.fillStyle = this.bgcolor;
-    this.ctx.fill();
-    
-}
-
-casseroleDial.prototype.drawNumbers = function() {
-    var ang;
-    var num;
-    this.ctx.font = "bold " + this.radius*0.15 + "px arial";
-    this.ctx.textBaseline="middle";
-    this.ctx.textAlign="center";
-    this.ctx.fillStyle="black";
-    this.ctx.beginPath();
-    this.ctx.moveTo(0,0);
-    for(num= this.min; num <= this.max; num+=this.step){
-        ang = this.convValToAngle(num);
-        this.ctx.rotate(ang);
-        this.ctx.translate(0, -this.radius*0.82);
-        this.ctx.rotate(-ang);
-        this.ctx.fillText(num.toString(), 0, 0);
-        this.ctx.rotate(ang);
-        this.ctx.translate(0, this.radius*0.82);
-        this.ctx.rotate(-ang);
-    }
-}
-
-casseroleDial.prototype.drawName = function() {
-    this.ctx.rect(-this.radius*0.9, this.radius*0.7, this.radius*0.9*2, this.radius*0.3 );
-    this.ctx.fillStyle="#cccccc";
-    this.ctx.fill();
-    this.ctx.translate(0, this.radius*0.85);
-    this.ctx.font=this.radius*0.18 + "px arial";
-    this.ctx.fillStyle="#EE0000";
-    this.ctx.fillText(this.name, 0, 0);
-    this.ctx.translate(0, -this.radius*0.85);
-
-} 
-
-casseroleDial.prototype.drawValue = function() {
-    this.ctx.translate(0, this.radius*0.4);
-    this.ctx.font="bold " + this.radius*0.20 + "px arial";
-    this.ctx.fillStyle="#008877";
-    this.ctx.fillText(this.value.toString(), 0, 0);
-    this.ctx.translate(0, -this.radius*0.4);
-
-} 
-
-casseroleDial.prototype.drawHand = function() {
-    var ang = this.convValToAngle(this.value);
-    this.ctx.strokeStyle=this.handcolor;
-    this.ctx.beginPath();
-    this.ctx.lineWidth = this.radius*0.08;
-    this.ctx.lineCap = "round";
-    this.ctx.moveTo(0,0);
-    this.ctx.rotate(ang);
-    this.ctx.lineTo(0, -this.radius*0.7);
-    this.ctx.stroke();
-    this.ctx.rotate(-ang);
-    
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, this.radius*0.1, 0, 2*Math.PI);
-    this.ctx.fillStyle = this.handcolor;
-    this.ctx.fill();
-}
 
 //END Dial Class
 
