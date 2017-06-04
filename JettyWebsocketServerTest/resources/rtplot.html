@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html>
+
+<title>Casserole Realtime Data Plot</title>
+
+<head>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+<h1>Robot Data</h1>
+<hr>
+<div/>
+<div id="id01">COM Status: Socket Not Yet Opened...</div>
+
+<br>
+<h3>Available Signals</h3>
+
+<button id="clear_btn" type="button" onclick="handleClearBtnClick()">Clear Selection</button> 
+
+<!-- Table of available signals - generated from data from websocket -->
+<div id="id02"></div>
+
+
+<br>
+
+
+
+<button id="start_btn" type="button" onclick="handleStartBtnClick()">Start</button> 
+<button id="stop_btn" type="button" onclick="handleStopBtnClick()">Stop</button> 
+
+<!-- Plot display -->
+<div id="id03"></div>
+
+
+<!-- Common navigation bar -->
+<hr>
+<div style="background-color:#ce7777">
+<p>
+<a href="index.html">Home</a>
+        
+<a href="presentState.html">State Data</a>
+        
+<a href="calibration.html">Calibration</a>
+        
+<a href="driverView.html">Driver View</a>
+
+<a href="rtplot.html">Plot View</a>
+</p>
+</div>
+<!-- END Common navigation bar -->
+
+<script type="text/javascript" src="/rtplot.js" >
+</script>
+
+</body>
+</html>
+

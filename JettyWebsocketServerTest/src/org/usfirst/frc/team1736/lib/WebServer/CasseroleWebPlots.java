@@ -41,9 +41,13 @@ import org.json.simple.JSONObject;
  * 
  *
  */
-public class CassesroleWebPlots {
+public class CasseroleWebPlots {
     /** The set of objects which are broadcast. Must be volatile to ensure atomic accesses */
-    static volatile Hashtable<String, PlotSignal> RTPlotSignals = new Hashtable<String, PlotSignal>();
+    public static volatile Hashtable<String, PlotSignal> RTPlotSignals = new Hashtable<String, PlotSignal>();
+    
+    public static ArrayList<PlotSignal> activeSignalList = null;
+    
+    public static boolean acqActive = false;
 
     /**
      * Put a new signal to the web interface, or update an existing one with the same name
@@ -53,8 +57,9 @@ public class CassesroleWebPlots {
      */
 	public static void addSample(String name, double samp_time, double value) {
 
-        if (RTPlotSignals.containsKey(name)) {
-        	RTPlotSignals.get(name).addSample(samp_time, value);
+		String fixed_name = Utils.nameTransform(name);
+        if (RTPlotSignals.containsKey(fixed_name)) {
+        	RTPlotSignals.get(fixed_name).addSample(samp_time, value);
 
         } else {
         	System.out.println("Error: RT Plot signal name " + name + " does not exist!");
@@ -62,10 +67,45 @@ public class CassesroleWebPlots {
     }
     
     public static void addNewSignal(String name, String units){
-    	if(!RTPlotSignals.containsKey(name)){
-    		PlotSignal new_obj = new PlotSignal(name, units);
-    		RTPlotSignals.put(name, new_obj);
+    	String fixed_name = Utils.nameTransform(name);
+    	if(!RTPlotSignals.containsKey(fixed_name)){
+    		PlotSignal new_obj = new PlotSignal(fixed_name, name, units);
+    		RTPlotSignals.put(fixed_name, new_obj);
     	}
+    }
+    
+    /**
+     * Given an array of signal names from a client, starts acquisition of those signals 
+     * @param signal_names
+     */
+    public static void startAcq(List<String> signal_names){
+    	activeSignalList = new ArrayList<PlotSignal>();
+    	
+    	for(String signal_name : signal_names){
+    		if(CasseroleWebPlots.RTPlotSignals.containsKey(signal_name)){
+    			activeSignalList.add(CasseroleWebPlots.RTPlotSignals.get(signal_name));
+    			CasseroleWebPlots.RTPlotSignals.get(signal_name).startAcq();
+    		} else {
+    			System.out.println("ERROR: RT Plot client asked for non-existant signal " + signal_name);
+    		}
+    	}
+    	acqActive = true;
+    	
+    }
+    
+    /**
+     * Stops all current acquisition
+     */
+    public static void stopAcq(){
+    	acqActive = false;
+    	
+    	for(PlotSignal signal : activeSignalList){
+    		signal.stopAcq();
+    		signal.clearBuffer();
+    	}
+    	
+    	activeSignalList = null;
+    	
     }
 
 }

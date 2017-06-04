@@ -4,7 +4,7 @@ public class PlotSample {
 	double value;
 	double time;
 	
-	public PlotSample(double val_in, double time_in){
+	public PlotSample(double time_in, double val_in){
 		value = val_in;
 		time = time_in;
 	}

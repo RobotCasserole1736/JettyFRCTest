@@ -96,7 +96,7 @@ public class CasseroleWebServer {
         context.addServlet(driverDatstreamHolder, "/driverviewstream");
         
         // RT Plot Streamer - broadcasts things which can be plotted in real-time
-        ServletHolder rtPlotHolder = new ServletHolder("rtplotstream", new CasseroleStateStreamerServlet());
+        ServletHolder rtPlotHolder = new ServletHolder("rtplotstream", new CasseroleRTPlotStreamerServlet());
         context.addServlet(rtPlotHolder, "/rtplot");
 
         // Kick off server in brand new thread.

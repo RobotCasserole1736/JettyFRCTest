@@ -2,6 +2,7 @@ package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
+import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebPlots;
 import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
 
 public class TestJSONDataSource {
@@ -11,7 +12,7 @@ public class TestJSONDataSource {
 	public double TestData3;
 	public boolean TestBool;
 	
-	public int counter;
+	public double counter;
 	
 	public Calibration cal1;
 	public Calibration cal2;
@@ -27,6 +28,10 @@ public class TestJSONDataSource {
 		CasseroleDriverView.newBoolean("Test Bool Display 2", "green");
 		CasseroleDriverView.newBoolean("Test Bool Display 3", "yellow");
 		CasseroleDriverView.newStringBox("Test String");
+		
+		CasseroleWebPlots.addNewSignal("Test Val1", "RPM");
+		CasseroleWebPlots.addNewSignal("Test Val2", "ft/s");
+		CasseroleWebPlots.addNewSignal("Battery Volts", "V");
 		
 	}
 	
@@ -44,11 +49,14 @@ public class TestJSONDataSource {
 					TestData3 = cal1.get()*Math.sin(counter/cal2.get())+50;
 					TestBool = TestData3 > 87.0;
 					
+					CasseroleWebPlots.addSample("Test Val1", counter*0.02, TestData3);
+					CasseroleWebPlots.addSample("Test Val2", counter*0.02, TestData3 * TestData3);
+					CasseroleWebPlots.addSample("Battery Volts", counter*0.02, (counter/5.0) % 12);
 					
 					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
-					CassesroleWebStates.putBoolean("Test Boolean", TestBool);
+					CassesroleWebStates.putBoolean("Battery Volts", TestBool);
 					
 					CassesroleWebStates.putString("Test String", "Very special things!");
 					
@@ -56,14 +64,15 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setDialValue("Test Val1 RPM", TestData3);
 					CasseroleDriverView.setDialValue("Test Val2 ft/s", 5.0);
 					CasseroleDriverView.setDialValue("Battery Volts", (counter/5.0) % 12);
-					CasseroleDriverView.setStringBox("Test String", "Test value " + Integer.toString(counter));
+					CasseroleDriverView.setStringBox("Test String", "Test value " + Double.toString(counter));
 					CasseroleDriverView.setBoolean("Test Bool Display 1", TestData3 > 45.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 2", TestData3 > 50.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
 					
 					counter++;
+					
 					try {
-						Thread.sleep(100);
+						Thread.sleep(50);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

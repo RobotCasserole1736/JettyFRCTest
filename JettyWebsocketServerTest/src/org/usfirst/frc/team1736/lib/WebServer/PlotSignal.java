@@ -9,6 +9,8 @@ public class PlotSignal {
 	String display_name;
 	String units;
 	
+	boolean acq_active;
+	
 	Queue<PlotSample> sample_queue;
 	
 	/**
@@ -16,10 +18,12 @@ public class PlotSignal {
 	 * @param name_in String of what to call the signal
 	 * @param units_in units the signal is in.
 	 */
-	public PlotSignal(String name_in, String units_in){
-		display_name = name_in;
-		name = Utils.nameTransform(name_in);
+	public PlotSignal(String name_in, String display_name_in, String units_in){
+		display_name = display_name_in;
+		name = name_in;
 		units = units_in;
+		
+		acq_active = false;
 		
 		sample_queue = new LinkedList<PlotSample>();
 	}
@@ -32,7 +36,22 @@ public class PlotSignal {
 	 * @param value_in
 	 */
 	public void addSample(double time_in, double value_in){
-		sample_queue.add(new PlotSample(time_in, value_in));
+		if(acq_active){
+			sample_queue.add(new PlotSample(time_in, value_in));
+		}
+	}
+	
+	/**
+	 * Start acquiring data on this channel. Should be called before attempting to read info.
+	 */
+	public void startAcq(){
+		acq_active = true;
+	}
+	/**
+	 * Stop acquiring data on this channel. Should be called when data no longer needs to be transmitted.
+	 */
+	public void stopAcq(){
+		acq_active = false;
 	}
 	
 	/**
@@ -52,5 +71,33 @@ public class PlotSignal {
 			retval = null;
 		}
 		return retval;
+	}
+	
+	/**
+	 * Discards all samples from the buffer
+	 */
+	public void clearBuffer(){
+		sample_queue.clear();
+	}
+	
+	/**
+	 * @return The name of the signal
+	 */
+	public String getName(){
+		return name;
+	}
+	
+	/**
+	 * @return The User-friendly name of the signal
+	 */
+	public String getDisplayName(){
+		return display_name;
+	}
+	
+	/**
+	 * @return The name of the units the signal is measured in.
+	 */
+	public String getUnits(){
+		return units;
 	}
 }

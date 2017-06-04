@@ -30,7 +30,8 @@ class CasseroleRTPlotStreamerServlet extends WebSocketServlet {
 
     @Override
     public void configure(WebSocketServletFactory factory) {
-        factory.getPolicy().setIdleTimeout(10000);
-        factory.register(CasseroleRTPlotStreamerServlet.class);
+        factory.getPolicy().setIdleTimeout(999999999); // I really don't want a timeout, and dont
+                                                       // care if it stays open indefinitely...
+        factory.register(CasseroleRTPlotStreamerSocket.class);
     }
 }
