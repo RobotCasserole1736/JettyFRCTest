@@ -14,16 +14,22 @@ var global_chart;
 
 dataSocket.onopen = function (event) {
     document.getElementById("id01").innerHTML = "COM Status: Socket Opened.";
+    document.getElementById("stop_btn").disabled = true;
+    document.getElementById("start_btn").disabled = false;
 };
 
 dataSocket.onerror = function (error) {
     document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
     alert("ERROR from RT Plot: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
+    document.getElementById("stop_btn").disabled = true;
+    document.getElementById("start_btn").disabled = true;
 };
 
 dataSocket.onclose = function (error) {
     document.getElementById("id01").innerHTML = "COM Status: Error with socket. Reconnect to robot, open driver station, then refresh this page.";
     alert("ERROR from RT Plot: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
+    document.getElementById("stop_btn").disabled = true;
+    document.getElementById("start_btn").disabled = true;
 };
 
 dataSocket.onmessage = function (event) {
@@ -100,6 +106,7 @@ function handleStartBtnClick(){
     
     //Disable signal selection
     document.getElementById("clear_btn").disabled = true;
+    document.getElementById("start_btn").disabled = true;
     for(i = 0; i < signal_names.length; i++){
         checkboxes = document.getElementsByName(signal_names[i]);
         for(var j=0, n=checkboxes.length;j<n;j++) {
@@ -152,22 +159,21 @@ function handleStartBtnClick(){
     options.title.text = "Real-Time Data";
     //Create dat chart
     global_chart = new Highcharts.Chart(options);
-    
-    
-
-
 
     //Request data from robot
     dataSocket.send(cmd); 
+    document.getElementById("stop_btn").disabled = false;
 }
 
 function handleStopBtnClick(){
     //Request stopping data from robot
     dataSocket.send("stop:"); 
     
+    document.getElementById("stop_btn").disabled = true;
+    
     //re-enable siagnal selection
-    //Disable signal selection
     document.getElementById("clear_btn").disabled = false;
+    document.getElementById("start_btn").disabled = false;
     for(i = 0; i < signal_names.length; i++){
         checkboxes = document.getElementsByName(signal_names[i]);
         for(var j=0, n=checkboxes.length;j<n;j++) {

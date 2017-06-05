@@ -149,10 +149,12 @@ public class CasseroleRTPlotStreamerSocket extends WebSocketAdapter {
         	PlotSample[] samples = sig.getAllSamples();
         	if(samples != null){
 	        	for(PlotSample samp : samples){
-	        		JSONObject sample_obj = new JSONObject();
-	        		sample_obj.put("time", samp.getTime_sec());
-	        		sample_obj.put("val", samp.getVal());
-	        		sample_arr.add(sample_obj);
+	        		if(samp != null){
+		        		JSONObject sample_obj = new JSONObject();
+		        		sample_obj.put("time", samp.getTime_sec());
+		        		sample_obj.put("val", samp.getVal());
+		        		sample_arr.add(sample_obj);
+	        		}
 	        	}
         	}
         	
