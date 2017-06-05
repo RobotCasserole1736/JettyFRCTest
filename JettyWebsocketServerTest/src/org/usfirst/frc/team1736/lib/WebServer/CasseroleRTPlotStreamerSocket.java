@@ -67,10 +67,8 @@ public class CasseroleRTPlotStreamerSocket extends WebSocketAdapter {
          * Handle the command & args parsed from the incoming message
          */
         if(cmd.compareTo("start")==0){
-        	System.out.println("Got Start command with args " + args);
         	handleSignalAcqList(args); 
         } else if (cmd.compareTo("stop")==0){
-        	System.out.println("Got Stop command");
         	handleStopAcq();
         } else if(cmd.compareTo("get_list")==0){
         	handleSignalListReq();
@@ -120,7 +118,6 @@ public class CasseroleRTPlotStreamerSocket extends WebSocketAdapter {
     	signal_names.removeAll(Arrays.asList("", null));
     	if(signal_names.size() > 0){
     		CasseroleWebPlots.startAcq(signal_names);
-    	   	
             // On client signal broadcast request, begin new task to braodcast data at a given interval
         	updater = new java.util.Timer("Realtime Plot Webpage Update");
             updater.scheduleAtFixedRate(new dataBroadcastTask(), 0, updatePeriodMS);
@@ -223,7 +220,6 @@ public class CasseroleRTPlotStreamerSocket extends WebSocketAdapter {
      */
     private class dataBroadcastTask extends TimerTask {
         public void run() {
-        	System.out.println("Broadcasting data!");
             broadcastData();
         }
     }
