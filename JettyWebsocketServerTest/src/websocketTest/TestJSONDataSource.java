@@ -32,6 +32,10 @@ public class TestJSONDataSource {
 		CasseroleWebPlots.addNewSignal("Test Val1", "RPM");
 		CasseroleWebPlots.addNewSignal("Test Val2", "ft/s");
 		CasseroleWebPlots.addNewSignal("Battery Volts", "V");
+		CasseroleWebPlots.addNewSignal("Battery Current", "A");
+		CasseroleWebPlots.addNewSignal("DT Left Motor Speed", "RPM");
+		CasseroleWebPlots.addNewSignal("DT Right Motor Speed", "RPM");
+		CasseroleWebPlots.addNewSignal("Shooter Motor Speed", "RPM");
 		
 	}
 	
@@ -52,6 +56,10 @@ public class TestJSONDataSource {
 					CasseroleWebPlots.addSample("Test Val1", counter*0.02, TestData3);
 					CasseroleWebPlots.addSample("Test Val2", counter*0.02, TestData3 * TestData3);
 					CasseroleWebPlots.addSample("Battery Volts", counter*0.02, (counter/5.0) % 12);
+					CasseroleWebPlots.addSample("Battery Current", counter*0.02,TestData3*TestData1 % 3000);
+					CasseroleWebPlots.addSample("DT Left Motor Speed", counter*0.02,(counter/5.0) % 12 * TestData3 * 0.1);
+					CasseroleWebPlots.addSample("DT Right Motor Speed", counter*0.02,Math.floor(TestData3/5)*5);
+					CasseroleWebPlots.addSample("Shooter Motor Speed", counter*0.02,Math.random()+TestData3);
 					
 					
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
@@ -72,7 +80,7 @@ public class TestJSONDataSource {
 					counter++;
 					
 					try {
-						Thread.sleep(50);
+						Thread.sleep(20);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

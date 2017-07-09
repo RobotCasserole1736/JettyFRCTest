@@ -72,8 +72,7 @@ function addDataToPlot(data){
         }
     }
     
-    global_chart.xAxis[0].max = newest_timestamp;
-    global_chart.xAxis[0].min = newest_timestamp - time_range_sec;
+    global_chart.xAxis[0].setExtremes(newest_timestamp - time_range_sec,newest_timestamp,false)
     //Force a chart update to display the table
     global_chart.redraw();
     
@@ -180,10 +179,13 @@ function handleStartBtnClick(){
                                   visibility_counter:0,
                                   yAxis:units_to_yaxis_index[unit],
                                   states: {
-                                    hover: {
-                                        enabled: false
-                                    }
-                                  }
+                                      hover: {
+                                          enabled: false
+                                      },
+                                  },
+                                  marker: {
+                                      enabled: null
+                                  },
                                  });
 
             }
@@ -224,6 +226,9 @@ function handleStopBtnClick(){
             checkboxes[j].disabled = false;
         }
     }
+    
+    //Reset chart bounds to all data recieved.
+    global_chart.xAxis[0].setExtremes(null,null)
 }
 
 function handleRefreshSignalsBtnClick(){
@@ -257,6 +262,27 @@ var dflt_options =  {
 			renderTo: 'container',
 			animation: false,
 			ignoreHiddenSeries: true,
+            resetZoomButton: {
+                position: {
+                    align: 'left',
+                },
+                theme: {
+                    fill: '#822',
+                    stroke: '#999',
+                    r: 3,
+                    style: {
+                        color: '#999'
+                    },
+                    states: {
+                        hover: {
+                            fill: '#782828',
+                            style: {
+                                color: '#ccc'
+                            },
+                        },
+                    },
+                },
+            },
 			panning: true,
 			panKey: 'shift',
 			showAxes: true,
@@ -335,14 +361,15 @@ var dflt_options =  {
 			backgroundColor: null,
             snap: 30,
 			borderWidth: 1,
+            borderColor: '#FF0000',
 			shadow: true,
 			animation: false,
 			useHTML: false,
 			style: {
-					padding: 0,
-                    color: '#D43',
-				}
-            },  
+                padding: 0,
+                color: '#D43',
+            }
+        },  
 
 		series: []
 	}
