@@ -1,7 +1,9 @@
 
-//Main code - executed on page load.
-
+///////////////////////////////////////////////////////////////////////////////////
+// Main code - executed on page load.
+///////////////////////////////////////////////////////////////////////////////////
 //Note - this PORT string must be aligned with the port the webserver is served on.
+// We'll hardcode for now, but this must remain aligned with the server java implementation
 var port = "5805";
 var hostname = window.location.hostname+":"+port;
 
@@ -18,9 +20,26 @@ var mouse_cursor_center = null;
 
 var global_chart;
 
+var local_storage_available = false;
+
 var time_range_sec = 10.0;
 
 var sq = {};
+
+var ls_sel_signals= []; //String array of the start-checked boxes from local storage
+
+//Set up Local Storage
+// LocalStorage is a javascript feature which allows you to store some string
+// on this particular client's PC. The usecase we'll be doing here is to remember
+// what checkboxes the user had checked so the next time they open the tab, we'll 
+// hit those same checkboxes. There's a couple things to consider here:
+// -- Robot code changed, so a checkbox which previously existed won't exist anymore
+// -- Local storage may not be available on the client.
+if (typeof(Storage) !== "undefined") {
+    local_storage_available = true;
+} else {
+    local_storage_available = false;
+}
 
 //The following chunk of main code and handler functions are to add chart interaction
 // which I find useful, but which highcharts does not implement natively.
@@ -36,6 +55,11 @@ if (sq.e.addEventListener) {
 else sq.e.attachEvent("onmousewheel", ChartMouseWheelHandler);
 
 sq.e.addEventListener('mousemove', ChartMouseMoveHandler, false);
+
+///////////////////////////////////////////////////////////////////////////////////
+// End Main Code
+///////////////////////////////////////////////////////////////////////////////////
+
 
 //sets mouse_cursor_center to an X value if possible, otherwise null
 // This is used by the zoom function to determine where the zoom center should be.
@@ -188,23 +212,39 @@ function genSignalListTable(arr){
     var col_counter = 0;
     var SIGNALS_PER_ROW = 1; //meh. html is hard.
     signal_names = [];
+    var checked_state = ""; //String to be injected into the html of the checkbox declaration if the checkbox should start checked
     
+    //Init some content for the dynamic HTML which will show checkboxes for each signal
     var out = "<table><tbody><tr>";
     
+    //Read the desired signals from selected signals
+    if(local_storage_available == true){
+        ls_sel_signals = JSON.parse(localStorage.getItem("CasseroleRTPlot"))
+        if(ls_sel_signals == null){
+            ls_sel_signals = [];
+        }
+    }
+    
     for(i = 0; i < arr.length; i++){
+        //Record the signal info in local arrays for later use (when starting a new recording)
         signal_names.push(arr[i].name);
         signal_units.push(arr[i].units);
         signal_display_names.push(arr[i].display_name);
-        out += "<td><input type=\"checkbox\" name=\""+arr[i].name+"\" />"+arr[i].display_name+" (" + arr[i].units + ") </td>";
-       
-        if(col_counter >= (SIGNALS_PER_ROW-1)){
-            //start a new row
-            col_counter = 0;
-            out += "</tr><tr>";
+        
+        //See if this signal's name is in the local storage list
+        if(ls_sel_signals.indexOf(arr[i].name) > -1){
+            //If it is, we'll inject some HTML magic to make the box start out checked
+            checked_state = "checked=\"checked\"";
         } else {
-            col_counter++;
+            checked_state = "";
         }
+        
+        //Add some html to display a checkbox for this signal
+        out += "<td><input type=\"checkbox\" name=\""+arr[i].name+"\" " + checked_state + " />"+arr[i].display_name+" (" + arr[i].units + ") </td></tr><tr>";
+        
     }
+    
+    //Close out the HTML and push it to the document for display.
     out +="</tr></tbody></table>";
     document.getElementById("id02").innerHTML = out;
 
@@ -215,6 +255,12 @@ function handleStartBtnClick(){
     var temp_series = [];
     var units_to_yaxis_index = [];
     var yaxis_index = 0;
+    
+    
+    if(local_storage_available){
+        //Clear local storage if available
+        ls_sel_signals = [];
+    }
     
     //deep-copy the default chart options
 	var options = $.extend(true, {}, dflt_options)
@@ -250,6 +296,12 @@ function handleStartBtnClick(){
             
             //For all checked boxes...
             if(checkboxes[j].checked == true){
+                
+                if(local_storage_available){
+                    //Record that the box was checked if local storage is available
+                    ls_sel_signals.push(signal_names[i]);
+                }
+                
                 //Assemble command for sending to server
                 cmd += signal_names[i] + ",";
                 
@@ -257,7 +309,7 @@ function handleStartBtnClick(){
                 var unit = signal_units[i];
                 if(!(unit in units_to_yaxis_index)){
                     units_to_yaxis_index[unit] = yaxis_index;
-                    options.yAxis.push({
+                    options.yAxis.push({    //All this is config for highcharts to make stuff look pretty
                                             title:{
                                                 text:unit,
                                                 style: {
@@ -301,6 +353,11 @@ function handleStartBtnClick(){
     
             
         }
+    }
+    
+    //Update local storage
+    if(local_storage_available){
+        localStorage.setItem("CasseroleRTPlot", JSON.stringify(ls_sel_signals));
     }
     
     
@@ -353,6 +410,12 @@ function handleClearBtnClick(){
         for(var j=0, n=checkboxes.length;j<n;j++) {
             checkboxes[j].checked = false;
         }
+    }
+    
+    //Reset localStorage
+    if(local_storage_available){
+        ls_sel_signals = [];
+        localStorage.setItem("CasseroleRTPlot", JSON.stringify(ls_sel_signals));
     }
 
 }
