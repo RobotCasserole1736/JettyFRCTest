@@ -46,7 +46,7 @@ public class Calibration {
     /** Present value for the calibration. Starts at default_val, but might get changed */
     public volatile double cur_val;
     /** True if the user has (somehow) made this calibration a non-default value */
-    public volatile boolean overridden;
+    public CalStates state;
     /**
      * Gets set to true every time the cal value is changed. Software may optionally watch this
      * boolean to see if the user has commanded a change, and then call the acknowledgeValUpdate()
@@ -57,6 +57,7 @@ public class Calibration {
     public double max_cal;
     /** Lower limit on the allowed calibration range */
     public double min_cal;
+    
 
 
     /**
@@ -73,7 +74,7 @@ public class Calibration {
         default_val = default_val_in;
         cur_val = default_val;
         name = name_in.trim().replace(" ", "_").replace("-", "_");
-        overridden = false;
+        state = CalStates.DEFAULT;
         is_updated = false;
         min_cal = Double.NEGATIVE_INFINITY;
         max_cal = Double.POSITIVE_INFINITY;
@@ -227,6 +228,8 @@ public class Calibration {
         cur_val = default_val;
     }
 
-
+enum CalStates {
+	DEFAULT, OVRD, PENDING 
+}
 
 }
