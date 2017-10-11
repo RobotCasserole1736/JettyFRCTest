@@ -47,6 +47,7 @@ public class Calibration {
     public volatile double cur_val;
     /** True if the user has (somehow) made this calibration a non-default value */
     public CalStates state;
+    boolean auto_trans;
     /**
      * Gets set to true every time the cal value is changed. Software may optionally watch this
      * boolean to see if the user has commanded a change, and then call the acknowledgeValUpdate()
@@ -113,7 +114,7 @@ public class Calibration {
 
 
     private void commonConstructor() {
-        overridden = false;
+        state = CalStates.DEFAULT;
         is_updated = false;
         CalWrangler.register(this);
     }
@@ -144,10 +145,17 @@ public class Calibration {
      * @return Present value of the calibration
      */
     public double get() {
-        if (overridden)
-            return cur_val;
-        else
+    	if (state == CalStates.PENDING)
+    		state = CalStates.OVRD;
+    	
+        if (state == CalStates.DEFAULT)
             return default_val;
+        else if (state == CalStates.PENDING)
+            return cur_val;
+        else if (state == CalStates.OVRD)
+        	return cur_val;
+        else
+        	return -1.0;
     }
 
 
@@ -214,7 +222,7 @@ public class Calibration {
     public void setOverride(double val_in) {
         double temp = limitRange(val_in);
         cur_val = temp;
-        overridden = true;
+        state = CalStates.PENDING;
         is_updated = true;
         System.out.println("Info: Calibration " + this.name + " set to " + Double.toString(cur_val));
     }
@@ -224,11 +232,11 @@ public class Calibration {
      * Returns the calibration back to the default value.
      */
     public void reset() {
-        overridden = false;
+        state = CalStates.PENDING;
         cur_val = default_val;
     }
 
-enum CalStates {
+public enum CalStates {
 	DEFAULT, OVRD, PENDING 
 }
 

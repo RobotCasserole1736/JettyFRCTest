@@ -133,7 +133,7 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
                     single_obj.put("dflt_val", Double.toString(cal.getDefault()));
                     single_obj.put("min_val", Double.toString(cal.min_cal));
                     single_obj.put("max_val", Double.toString(cal.max_cal));
-                    single_obj.put("ovrdn", Boolean.toString(cal.overridden));
+                    single_obj.put("state", (cal.state.toString()));
                     single_obj.put("cur_val", Double.toString(cal.get()));
                     data_array.add(single_obj);
                 }

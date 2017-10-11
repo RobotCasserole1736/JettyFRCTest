@@ -63,7 +63,7 @@ function genTable(arr) {
                "</td><td style=\"width: 100px;\">" +
                arr.cal_array[i].max_val +
                "</td><td style=\"width: 75px;\">" +
-               arr.cal_array[i].ovrdn +
+               arr.cal_array[i].state +
                "</td><td style=\"width: 100px;\">" +
                arr.cal_array[i].cur_val +
                "</td><td style=\"width: 100px;\">" +
