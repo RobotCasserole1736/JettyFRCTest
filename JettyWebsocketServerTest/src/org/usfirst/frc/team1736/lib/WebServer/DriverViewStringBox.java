@@ -48,5 +48,15 @@ public class DriverViewStringBox extends DriverViewObject {
 		value = value_in;
 		sbJsonUpdateObj.put("value", value);
 	}
+	
+	@Override
+	public void setCommandObj(Object state) {
+		return; //nothing to do.
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 }

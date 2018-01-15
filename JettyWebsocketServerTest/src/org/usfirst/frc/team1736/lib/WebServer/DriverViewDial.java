@@ -95,6 +95,14 @@ public class DriverViewDial extends DriverViewObject {
 		dialJsonUpdateObj.put("value", String.format(VAL_DISPLAY_FORMATTER, value));
 	}
 	
-	
+	@Override
+	public void setCommandObj(Object state) {
+		return; //nothing to do.
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 }

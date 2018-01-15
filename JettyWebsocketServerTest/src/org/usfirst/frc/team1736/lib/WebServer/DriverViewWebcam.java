@@ -64,4 +64,16 @@ public class DriverViewWebcam extends DriverViewObject{
         webcamJsonUpdateObj.put("marker_y", marker_y);
 		
 	}
+
+
+	@Override
+	public void setCommandObj(Object state) {
+		return; //nothing to do.
+	}
+
+
+	@Override
+	public String getName() {
+		return name;
+	}
 }

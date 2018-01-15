@@ -26,6 +26,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 
 /**
  * DESCRIPTION: <br>
@@ -47,12 +48,23 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
      */
     public void setUpdatePeriod(int in_period_ms) {
         updatePeriodMS = in_period_ms;
+        
     }
 
 
     @Override
     public void onWebSocketText(String message) {
-
+    	String[] messageParts = message.split(":");
+    	if (messageParts.length == 2) {
+    		String source = messageParts[0];
+    		String cmd    = messageParts[1];
+            for (DriverViewObject obj : CasseroleDriverView.getAllObjects()) {
+                if(obj.getName().equals(source)) {
+                	obj.setCommandObj(cmd);
+                	break;
+                }
+            }
+    	}
     }
 
 

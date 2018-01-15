@@ -28,6 +28,9 @@ public class TestJSONDataSource {
 		CasseroleDriverView.newBoolean("Test Bool Display 2", "green");
 		CasseroleDriverView.newBoolean("Test Bool Display 3", "yellow");
 		CasseroleDriverView.newStringBox("Test String");
+		CasseroleDriverView.newAutoSelector("Auto 1",  new String[]{"Test 1","Another Wonderful Test", "Test 35"});
+		CasseroleDriverView.newAutoSelector("Auto Two",  new String[]{"One Fish","Two Fish", "Red Fish", "Blue Fish"});
+		
 		
 		CasseroleWebPlots.addNewSignal("Test Val1", "RPM");
 		CasseroleWebPlots.addNewSignal("Test Val2", "ft/s");

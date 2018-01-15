@@ -54,5 +54,15 @@ public class DriverViewBoolean extends DriverViewObject {
 			boolJsonUpdateObj.put("value", "False");
 		}
 	}
+	
+	@Override
+	public void setCommandObj(Object state) {
+		return; //nothing to do.
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
 
 }

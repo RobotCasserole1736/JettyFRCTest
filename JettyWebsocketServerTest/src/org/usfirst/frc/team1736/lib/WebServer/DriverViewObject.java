@@ -15,5 +15,16 @@ public abstract class DriverViewObject {
 	 * @return
 	 */
 	public abstract JSONObject getUpdJsonObj();
-
+	
+	/**
+	 * Interface to set an object when the website delivers an update
+	 * @return
+	 */
+	public abstract void setCommandObj(Object cmd);
+	
+	/**
+	 * 
+	 * @return the assigned name for the object
+	 */
+	public abstract String getName();
 }

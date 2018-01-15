@@ -49,6 +49,7 @@ public class CasseroleDriverView {
     static volatile Hashtable<String, DriverViewDial> dialObjects = new Hashtable<String, DriverViewDial>();
     static volatile Hashtable<String, DriverViewWebcam> webcamObjects = new Hashtable<String, DriverViewWebcam>();
     static volatile Hashtable<String, DriverViewBoolean> booleanObjects = new Hashtable<String, DriverViewBoolean>();
+    static volatile Hashtable<String, DriverViewAutoSelector> asObjects = new Hashtable<String, DriverViewAutoSelector>();
     static volatile Hashtable<String, DriverViewStringBox> stringBoxObjects = new Hashtable<String, DriverViewStringBox>();
 
 
@@ -136,6 +137,18 @@ public class CasseroleDriverView {
     	DriverViewBoolean newBoolean = new DriverViewBoolean( name_in, color_in );
     	booleanObjects.put(name_in, newBoolean);
     }
+    
+    /**
+     * 
+     * @param name_in
+     * @param options_in
+     */
+    @SuppressWarnings("unchecked")
+	public static void newAutoSelector(String name_in, String[] options_in) {
+
+    	DriverViewAutoSelector newAutoSelector = new DriverViewAutoSelector( name_in, options_in );
+    	asObjects.put(name_in, newAutoSelector);
+    }
 
 
     /**
@@ -201,6 +214,23 @@ public class CasseroleDriverView {
     	}
     }
     
+    
+    /**
+     * 
+     * @param name_in
+     * @param options_in
+     */
+    @SuppressWarnings("unchecked")
+	public static String getAutoSelectorVal(String name_in) {
+    	
+    	if(asObjects.containsKey(name_in)){
+    		return asObjects.get(name_in).getVal(name_in);
+    	} else {
+    		System.out.println("Warning: Driverview web server: No webcam named " + name_in + " exists yet. No value set. ");
+    		return null;
+    	}
+    }
+    
     /**
      * @return a set of DriverViewObjects which can be used for working on the set of all things on the driver view.
      */
@@ -208,9 +238,10 @@ public class CasseroleDriverView {
     	ArrayList<DriverViewObject> tmp_list = new ArrayList<DriverViewObject>(); 
     	
     	tmp_list.addAll(dialObjects.values());
-    	tmp_list.addAll( webcamObjects.values());
-    	tmp_list.addAll( booleanObjects.values());
-    	tmp_list.addAll( stringBoxObjects.values());
+    	tmp_list.addAll(webcamObjects.values());
+    	tmp_list.addAll(booleanObjects.values());
+    	tmp_list.addAll(stringBoxObjects.values());
+    	tmp_list.addAll(asObjects.values());
     	
     	return tmp_list;
     }
