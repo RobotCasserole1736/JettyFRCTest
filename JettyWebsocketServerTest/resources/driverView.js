@@ -385,6 +385,14 @@ dataSocket.onclose = function (error) {
   alert("ERROR from Driver View: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
+autoSelUpdateWs= function (object){
+    id = object.id;
+    console.log("Auto Select hanlder called");
+    console.log(id);
+    console.log(document.getElementById(id).value);
+    dataSocket.send(id+":"+document.getElementById(id).value);
+}
+
 dataSocket.onmessage = function (event) {
   var arr = JSON.parse(event.data);
   
@@ -413,7 +421,7 @@ dataSocket.onmessage = function (event) {
 		 } else if(arr.obj_array[i].type == "autosel"){
             autoSelText += "<table>"
             autoSelText += "<tr><td>" + arr.obj_array[i].name + "</td></tr>"
-            autoSelText += "<tr><td><select>" 
+            autoSelText += "<tr><td><select id=\""+arr.obj_array[i].id+"\" onChange=\"autoSelUpdateWs(this)\">" 
             for(j = 0; j < arr.obj_array[i].options.length; j++){
                 autoSelText += "<option value=\"" + arr.obj_array[i].options[j].id + "\">" + arr.obj_array[i].options[j].displayName + "</option>"
             }

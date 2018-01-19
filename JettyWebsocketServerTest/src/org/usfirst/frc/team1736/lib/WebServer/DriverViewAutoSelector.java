@@ -13,15 +13,17 @@ public class DriverViewAutoSelector extends DriverViewObject {
     private JSONObject asJsonUpdateObj;
     
     /** String for keeping track of present value */
-    private String current_id;
+    private String current_selected_id = "";
     
     String name;
+    String id;
 	String[] selection_ids;
 	static volatile Hashtable<String, String> idToNameTable = new Hashtable<String, String>();
 	
 	
 	public DriverViewAutoSelector(String name_in, String[] options){
 		name = name_in;
+		id = Utils.nameTransform(name_in);
 		
 		selection_ids = new String[options.length];
 		
@@ -33,7 +35,8 @@ public class DriverViewAutoSelector extends DriverViewObject {
         // Create new objects
 		asJsonInitObj = new JSONObject();
 		asJsonInitObj.put("type", "autosel");
-		asJsonInitObj.put("name", name_in);
+		asJsonInitObj.put("name", name);
+		asJsonInitObj.put("id", id);
 		
 		JSONArray optsArrObj = new JSONArray();
 		for(String id : selection_ids) {
@@ -59,7 +62,7 @@ public class DriverViewAutoSelector extends DriverViewObject {
 	
 	@Override
 	public void setCommandObj(Object cmd_in) {
-		current_id = (String) cmd_in;
+		current_selected_id = (String) cmd_in;
 	}
 	
 	public String getNameFromId(String id) {
@@ -67,10 +70,10 @@ public class DriverViewAutoSelector extends DriverViewObject {
 	}
 
 	public String getVal(String name) {
-		if(current_id != null)
-			return getNameFromId(current_id);
+		if(current_selected_id != "")
+			return getNameFromId(current_selected_id);
 		else
-			return null;
+			return "";
 
 	}
 

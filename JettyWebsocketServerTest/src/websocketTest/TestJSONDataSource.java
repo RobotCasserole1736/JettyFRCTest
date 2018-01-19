@@ -28,6 +28,8 @@ public class TestJSONDataSource {
 		CasseroleDriverView.newBoolean("Test Bool Display 2", "green");
 		CasseroleDriverView.newBoolean("Test Bool Display 3", "yellow");
 		CasseroleDriverView.newStringBox("Test String");
+		CasseroleDriverView.newStringBox("Test String2");
+		CasseroleDriverView.newStringBox("Test String3");
 		CasseroleDriverView.newAutoSelector("Auto 1",  new String[]{"Test 1","Another Wonderful Test", "Test 35"});
 		CasseroleDriverView.newAutoSelector("Auto Two",  new String[]{"One Fish","Two Fish", "Red Fish", "Blue Fish"});
 		
@@ -69,13 +71,14 @@ public class TestJSONDataSource {
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
 					CassesroleWebStates.putBoolean("Battery Volts", TestBool);
 					
-					CassesroleWebStates.putString("Test String", "Very special things!");
+					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto 1"));
 					
 					
 					CasseroleDriverView.setDialValue("Test Val1 RPM", TestData3);
 					CasseroleDriverView.setDialValue("Test Val2 ft/s", 5.0);
 					CasseroleDriverView.setDialValue("Battery Volts", (counter/5.0) % 12);
-					CasseroleDriverView.setStringBox("Test String", "Test value " + Double.toString(counter));
+					CasseroleDriverView.setStringBox("Test String2", "Test value " + Double.toString(counter));
+					CasseroleDriverView.setStringBox("Test String3", CasseroleDriverView.getAutoSelectorVal("Auto 1"));
 					CasseroleDriverView.setBoolean("Test Bool Display 1", TestData3 > 45.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 2", TestData3 > 50.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
