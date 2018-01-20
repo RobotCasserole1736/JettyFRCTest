@@ -71,7 +71,7 @@ public class TestJSONDataSource {
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
 					CassesroleWebStates.putBoolean("Battery Volts", TestBool);
 					
-					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto 1"));
+					
 					
 					
 					CasseroleDriverView.setDialValue("Test Val1 RPM", TestData3);
@@ -82,6 +82,9 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setBoolean("Test Bool Display 1", TestData3 > 45.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 2", TestData3 > 50.0);
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
+					CasseroleDriverView.setStringBox("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
+					
+					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 					
 					counter++;
 					

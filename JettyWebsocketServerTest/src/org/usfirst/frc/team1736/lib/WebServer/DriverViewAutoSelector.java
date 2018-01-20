@@ -16,14 +16,14 @@ public class DriverViewAutoSelector extends DriverViewObject {
     private String current_selected_id = "";
     
     String name;
-    String id;
+    String displayName;
 	String[] selection_ids;
 	static volatile Hashtable<String, String> idToNameTable = new Hashtable<String, String>();
 	
 	
 	public DriverViewAutoSelector(String name_in, String[] options){
-		name = name_in;
-		id = Utils.nameTransform(name_in);
+		name = Utils.nameTransform(name_in);
+		displayName = name_in;
 		
 		selection_ids = new String[options.length];
 		
@@ -36,7 +36,7 @@ public class DriverViewAutoSelector extends DriverViewObject {
 		asJsonInitObj = new JSONObject();
 		asJsonInitObj.put("type", "autosel");
 		asJsonInitObj.put("name", name);
-		asJsonInitObj.put("id", id);
+		asJsonInitObj.put("displayName", displayName);
 		
 		JSONArray optsArrObj = new JSONArray();
 		for(String id : selection_ids) {
@@ -48,10 +48,10 @@ public class DriverViewAutoSelector extends DriverViewObject {
 		asJsonInitObj.put("options",optsArrObj);
 		
 	    //Create the JSON object for defining the update data for the autoshift selector.
-		//Curently does nothing.
 	    asJsonUpdateObj = new JSONObject();
 	    asJsonUpdateObj.put("type", "autosel");
 	    asJsonUpdateObj.put("name", name);
+	    asJsonUpdateObj.put("val", "None");
 		
 	}
 
@@ -63,6 +63,7 @@ public class DriverViewAutoSelector extends DriverViewObject {
 	@Override
 	public void setCommandObj(Object cmd_in) {
 		current_selected_id = (String) cmd_in;
+		asJsonUpdateObj.put("val", getNameFromId(current_selected_id));
 	}
 	
 	public String getNameFromId(String id) {

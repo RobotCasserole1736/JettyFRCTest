@@ -58,12 +58,15 @@ public class CasseroleDriverViewStreamerSocket extends WebSocketAdapter {
     	if (messageParts.length == 2) {
     		String source = messageParts[0];
     		String cmd    = messageParts[1];
+    		
             for (DriverViewObject obj : CasseroleDriverView.getAllObjects()) {
                 if(obj.getName().equals(source)) {
                 	obj.setCommandObj(cmd);
                 	break;
                 }
             }
+    	} else {
+    		System.out.println("Warning: Malformed Driver View Message " + message);
     	}
     }
 

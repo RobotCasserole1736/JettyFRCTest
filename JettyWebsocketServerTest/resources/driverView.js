@@ -385,12 +385,18 @@ dataSocket.onclose = function (error) {
   alert("ERROR from Driver View: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
+//Callback for when the auton selector changes state.
+// Should read the switch dropdown and send a websocket message with the new value
 autoSelUpdateWs= function (object){
     id = object.id;
     console.log("Auto Select hanlder called");
     console.log(id);
     console.log(document.getElementById(id).value);
     dataSocket.send(id+":"+document.getElementById(id).value);
+}
+
+autoSelSetCurrent = function(name, val){
+    document.getElementById(name+"_cur").innerHTML = val;
 }
 
 dataSocket.onmessage = function (event) {
@@ -405,6 +411,7 @@ dataSocket.onmessage = function (event) {
     autoSelText = "";
     
     //Part 1 - HTML Setup
+    autoSelText += "<tr><th>Auto Mode</th><th>Select</th><th>Current</th></tr>"
     for(i = 0; i < arr.obj_array.length; i++){
         if(arr.obj_array[i].type == "dial"){
             dialCanvasTexts += "<canvas id=\"obj"+ (arr.obj_array[i].name) +"\" width=\"175\" height=\"175\" style=\"background-color:#333\"></canvas>"
@@ -419,14 +426,15 @@ dataSocket.onmessage = function (event) {
 			//Draw webcam plus crosshairs overlaid
 			webcamTexts += "<td><div id=\"outter\" style=\"position:relative;width:300px;height:auto;\"><img src=\""+arr.obj_array[i].url+"\" style=\"width:300px;height:auto;transform:rotate("+rotation.toString()+"deg)\"/><div id=\"crosshair_vert"+ (arr.obj_array[i].name) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:2px;height:30px;transform:translate(-50%, -50%)\"/><div id=\"crosshair_horiz"+ (arr.obj_array[i].name) +"\" style=\"background:yellow;position:absolute;top:"+tgt_y_pct.toString()+"%;left:"+tgt_x_pct.toString()+"%;width:30px;height:2px;transform:translate(-50%, -50%)\"/></div></td>";    
 		 } else if(arr.obj_array[i].type == "autosel"){
-            autoSelText += "<table>"
-            autoSelText += "<tr><td>" + arr.obj_array[i].name + "</td></tr>"
-            autoSelText += "<tr><td><select id=\""+arr.obj_array[i].id+"\" onChange=\"autoSelUpdateWs(this)\">" 
+            autoSelText += "<tr>";
+            autoSelText += "<td>" + arr.obj_array[i].displayName + "</td>";
+            autoSelText += "<td><select id=\""+arr.obj_array[i].name+"\" onChange=\"autoSelUpdateWs(this)\">";
             for(j = 0; j < arr.obj_array[i].options.length; j++){
-                autoSelText += "<option value=\"" + arr.obj_array[i].options[j].id + "\">" + arr.obj_array[i].options[j].displayName + "</option>"
+                autoSelText += "<option value=\"" + arr.obj_array[i].options[j].id + "\">" + arr.obj_array[i].options[j].displayName + "</option>";
             }
-            autoSelText += "</select></td></tr>"
-            autoSelText += "</table>"
+            autoSelText += "</select></td>";
+            autoSelText += "<td id=\""+arr.obj_array[i].name+"_cur\">NOT SET</td>";
+            autoSelText += "</tr>";
          }
     }
 	
@@ -456,7 +464,7 @@ dataSocket.onmessage = function (event) {
             document.getElementById("crosshair_vert"+arr.obj_array[i].name).setAttribute("style",  "background:red;position:absolute;top:"+arr.obj_array[i].marker_y+"%;left:"+arr.obj_array[i].marker_x+"%;width:2px;height:30px;transform:translate(-50%, -50%)");
             document.getElementById("crosshair_horiz"+arr.obj_array[i].name).setAttribute("style", "background:white;position:absolute;top:"+arr.obj_array[i].marker_y+"%;left:"+arr.obj_array[i].marker_x+"%;width:30px;height:2px;transform:translate(-50%, -50%)");
         } else if(arr.obj_array[i].type == "autosel"){
-            //currently nothing to do
+            autoSelSetCurrent(arr.obj_array[i].name, arr.obj_array[i].val);
         } else {
             display_objs[arr.obj_array[i].name].setValue(arr.obj_array[i].value);
         }
@@ -467,7 +475,6 @@ dataSocket.onmessage = function (event) {
   
   
 };
-
 
 
 
