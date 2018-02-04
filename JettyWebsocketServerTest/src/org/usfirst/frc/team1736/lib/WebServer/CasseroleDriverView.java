@@ -226,8 +226,8 @@ public class CasseroleDriverView {
     	if(asObjects.containsKey(name_in)){
     		return asObjects.get(name_in).getVal(name_in);
     	} else {
-    		System.out.println("Warning: Driverview web server: No webcam named " + name_in + " exists yet. No value set. ");
-    		return null;
+    		System.out.println("Warning: Driverview web server: No Auto Selector named " + name_in + " exists yet. No value available. ");
+    		return "";
     	}
     }
     

@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 
 public class DriverViewAutoSelector extends DriverViewObject {
 	
-    /** JSON object for initializing the  */
+    /** JSON object for initializing the ... thing...  */
     private JSONObject asJsonInitObj;
     
     private JSONObject asJsonUpdateObj;
@@ -24,6 +24,11 @@ public class DriverViewAutoSelector extends DriverViewObject {
 	public DriverViewAutoSelector(String name_in, String[] options){
 		name = Utils.nameTransform(name_in);
 		displayName = name_in;
+		
+		if(options.length == 0) {
+			System.out.println("Error: Auto Selector " + name_in + " has no options. Not adding.");
+			return;
+		}
 		
 		selection_ids = new String[options.length];
 		
@@ -51,7 +56,10 @@ public class DriverViewAutoSelector extends DriverViewObject {
 	    asJsonUpdateObj = new JSONObject();
 	    asJsonUpdateObj.put("type", "autosel");
 	    asJsonUpdateObj.put("name", name);
-	    asJsonUpdateObj.put("val", "None");
+	    
+	    current_selected_id = selection_ids[0]; //Default to the first one. Meh. This _happens_ to match the js implementation. I do not like. But it is functional, and there are bigger fish to fry.
+	    
+	    asJsonUpdateObj.put("val", getNameFromId(selection_ids[0])); 
 		
 	}
 
