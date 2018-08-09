@@ -98,6 +98,11 @@ public class CasseroleWebServer {
         // RT Plot Streamer - broadcasts things which can be plotted in real-time
         ServletHolder rtPlotHolder = new ServletHolder("rtplotstream", new CasseroleRTPlotStreamerServlet());
         context.addServlet(rtPlotHolder, "/rtplot");
+        
+        // PoseView - Displays a representation of the robot on the field
+        ServletHolder robotPoseHolder = new ServletHolder("poseview", new CasseroleRobotPoseViewServlet());
+        context.addServlet(robotPoseHolder, "/poseview");
+
 
         // Kick off server in brand new thread.
         // Thanks to Team 254 for an example of how to do this!

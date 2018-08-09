@@ -1,7 +1,10 @@
 package websocketTest;
 
+import java.awt.geom.Point2D;
+
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
+import org.usfirst.frc.team1736.lib.WebServer.CasseroleRobotPoseView;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebPlots;
 import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
 
@@ -42,6 +45,20 @@ public class TestJSONDataSource {
 		CasseroleWebPlots.addNewSignal("DT Right Motor Speed", "RPM");
 		CasseroleWebPlots.addNewSignal("Shooter Motor Speed", "RPM");
 		
+		Point2D.Double[] fieldpoly = {new Point2D.Double(0,0),
+				                      new Point2D.Double(11,0),
+				                      new Point2D.Double(13.47,3),
+				                      new Point2D.Double(13.47,51),
+				                      new Point2D.Double(11,54),
+				                      new Point2D.Double(-11,54),
+				                      new Point2D.Double(-13.47,51),
+				                      new Point2D.Double(-13.47,3),
+				                      new Point2D.Double(-11,0),
+				                      new Point2D.Double(0,0)
+		                              };
+		CasseroleRobotPoseView.setFieldPolygon(fieldpoly);
+		CasseroleRobotPoseView.setRobotSize(2.0, 2.5);
+		
 	}
 	
 	public void startDataGeneration(){
@@ -70,6 +87,7 @@ public class TestJSONDataSource {
 					CassesroleWebStates.putInteger("Test Data #1", TestData1);
 					CassesroleWebStates.putDouble("Test Data #2", TestData2);
 					CassesroleWebStates.putBoolean("Battery Volts", TestBool);
+					CassesroleWebStates.putDouble("Counter", counter%360);
 					
 					
 					
@@ -85,6 +103,9 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setStringBox("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 					
 					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
+					
+					CasseroleRobotPoseView.setRobotPose(0, 10, counter);
+					
 					
 					counter++;
 					
