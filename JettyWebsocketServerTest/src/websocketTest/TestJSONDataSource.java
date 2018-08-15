@@ -22,7 +22,7 @@ public class TestJSONDataSource {
 	
 	public void initDataGeneration(){
 				
-		CasseroleDriverView.newDial("Test Val1 RPM", 0, 200, 25, 55, 130);
+		CasseroleDriverView.newDial("Test Val1 RPM", -300, 300, 50, -200, 200);
 		CasseroleDriverView.newDial("Test Val2 ft/s", -20, 20, 5, -3, 3);
 		CasseroleDriverView.newDial("Battery Volts", 0, 15, 1, 10.5, 13.5);
 		CasseroleDriverView.newWebcam("Test WebCam", "http://plazacam.studentaffairs.duke.edu/mjpg/video.mjpg", 50.0, 25.0, 90.0);
@@ -66,13 +66,15 @@ public class TestJSONDataSource {
 		cal2 = new Calibration("Cal2",15.0);
 		counter = 0;
 		
+		RobotPose test_pose = new RobotPose();
+		
 		Thread dataGenThread = new Thread(new Runnable() {
 			@Override
 			public void run(){
 				while(true){
 					TestData1 = TestData1 - 3 + (int)cal1.get();
 					TestData2 = TestData1/2.0 + 4.0 + cal2.get();
-					TestData3 = cal1.get()*Math.sin(counter/cal2.get())+50;
+					TestData3 = 250*Math.sin(counter/cal2.get());
 					TestBool = TestData3 > 87.0;
 					
 					CasseroleWebPlots.addSample("Test Val1", counter*0.02, TestData3);
@@ -104,8 +106,9 @@ public class TestJSONDataSource {
 					
 					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 					
-					CasseroleRobotPoseView.setRobotPose(0, 10, counter);
-					
+					test_pose.setLeftMotorSpeed(TestData3);
+					test_pose.setRightMotorSpeed(TestData3);
+					test_pose.update();
 					
 					counter++;
 					
