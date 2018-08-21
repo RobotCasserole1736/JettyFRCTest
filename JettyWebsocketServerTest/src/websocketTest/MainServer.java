@@ -1,9 +1,8 @@
 package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.CalWrangler;
-import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
+import org.usfirst.frc.team1736.lib.DataServer.CasseroleDataServer;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebServer;
-import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
 
 public class MainServer {
 	
@@ -16,6 +15,8 @@ public class MainServer {
 		datasource.initDataGeneration();
 		datasource.startDataGeneration();
 		webserver.startServer();
+		
+		CasseroleDataServer.getInstance().startServer();
 
 	}
 

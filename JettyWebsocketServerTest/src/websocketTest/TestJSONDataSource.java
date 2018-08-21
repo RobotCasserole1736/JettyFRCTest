@@ -1,6 +1,7 @@
 package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
+import org.usfirst.frc.team1736.lib.DataServer.Signal;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebPlots;
 import org.usfirst.frc.team1736.lib.WebServer.CassesroleWebStates;
@@ -16,6 +17,9 @@ public class TestJSONDataSource {
 	
 	public Calibration cal1;
 	public Calibration cal2;
+	
+	Signal testSig1;
+	Signal counterSig;
 	
 	public void initDataGeneration(){
 				
@@ -41,6 +45,10 @@ public class TestJSONDataSource {
 		CasseroleWebPlots.addNewSignal("DT Left Motor Speed", "RPM");
 		CasseroleWebPlots.addNewSignal("DT Right Motor Speed", "RPM");
 		CasseroleWebPlots.addNewSignal("Shooter Motor Speed", "RPM");
+		
+		testSig1 = new Signal("Test Value 1", "km/h");
+		counterSig = new Signal("Loop Counter", "Loops");
+		
 		
 	}
 	
@@ -85,6 +93,10 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setStringBox("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 					
 					CassesroleWebStates.putString("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
+					
+					double sampleTime = System.currentTimeMillis();
+					counterSig.addSample(sampleTime, counter);
+					testSig1.addSample(sampleTime, TestData3);
 					
 					counter++;
 					

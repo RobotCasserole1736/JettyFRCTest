@@ -1,17 +1,19 @@
 
-//Note - this PORT string must be aligned with the port the webserver is served on.
-var port = "5805";
+//Note - this PORT string must be aligned with the port the Data Server is served on.
+var port = "5806";
 var hostname = window.location.hostname+":"+port;
 
-var dataSocket = new WebSocket("ws://"+hostname+"/statestream")
+var dataSocket = new WebSocket("ws://"+hostname+"/ds")
 var numTransmissions = 0;
 
 dataSocket.onopen = function (event) {
   document.getElementById("id01").innerHTML = "Socket Open";
+  
 };
 
 dataSocket.onmessage = function (event) {
-  genTable(event.data);
+  serverMsg = JSON.parse(event.data)
+  genTable(serverMsg.signals);
   numTransmissions = numTransmissions + 1;
   document.getElementById("id01").innerHTML = "COM Status: Socket Open. RX Count:" + numTransmissions; 
 };
@@ -26,8 +28,7 @@ dataSocket.onclose = function (error) {
   alert("ERROR from Present State: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
-function genTable(json_data) {
-    var arr = JSON.parse(json_data);
+function genTable(arr) {
     var i;
     var out = "<table border=\"1\">";
 
