@@ -8,11 +8,40 @@ var numTransmissions = 0;
 
 dataSocket.onopen = function (event) {
   document.getElementById("id01").innerHTML = "Socket Open";
+
+  // Send the command to get the list of all signals
+  dataSocket.send(JSON.stringify({cmd: "getSig"}));
+
+  //Nothing else to do on init, at least till the server responds with the signal list
   
 };
 
 dataSocket.onmessage = function (event) {
-  serverMsg = JSON.parse(event.data)
+  serverMsg = JSON.parse(event.data);
+
+  var daq_request_cmd = {};
+
+  if(serverMsg.type == "sig_list") {
+    // When the server sends us a signal list, we respond by requesting a single DAQ List with every signal
+    daq_request_cmd.cmd = "addDaq";
+    daq_request_cmd.id = "main";
+    daq_request_cmd.tx_period_ms = "100";
+    daq_request_cmd.samp_period_ms = "100";
+
+    var i = 0;
+    for(signal in serverMsg.signals){
+      
+      daq_request_cmd.id[i++] = signal.id[i++]
+    }
+
+    websocket.send(JSON.stringify(daq_request_cmd));
+
+  } else if(serverMsg.type == "daq_update") {
+    if(serverMsg.daq_id == "main"){
+
+    }
+  }
+
   genTable(serverMsg.signals);
   numTransmissions = numTransmissions + 1;
   document.getElementById("id01").innerHTML = "COM Status: Socket Open. RX Count:" + numTransmissions; 
