@@ -78,7 +78,9 @@ public class CasseroleDataServer {
      * @return a simple array of all registered signals
      */
     public Signal[] getAllSignals() {
-    	return (Signal[]) signalList.values().toArray();
+        Signal[] retval = new Signal[signalList.size()];
+        signalList.values().toArray(retval);
+        return retval;
     }
 
 

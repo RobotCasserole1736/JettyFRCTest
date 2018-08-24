@@ -86,10 +86,12 @@ public class Socket extends WebSocketAdapter {
 			String tx_period_ms   = (String) in.get("tx_period_ms");
 			String samp_period_ms = (String) in.get("samp_period_ms");
 			JSONArray sig_id_list = (JSONArray) in.get("sig_id_list");
+			String[] id_list_array = new String[sig_id_list.size()];
+			sig_id_list.toArray(id_list_array);
 			handleNewDAQ( id,
 					      Double.parseDouble(tx_period_ms),
 					      Double.parseDouble(samp_period_ms),
-					      (String [])sig_id_list.toArray()
+					      id_list_array
 					    );
 		} else if(cmd.equals("start") ) {
 			handleStartReq();

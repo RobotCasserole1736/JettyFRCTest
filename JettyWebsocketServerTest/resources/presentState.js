@@ -27,22 +27,27 @@ dataSocket.onmessage = function (event) {
     daq_request_cmd.id = "main";
     daq_request_cmd.tx_period_ms = "100";
     daq_request_cmd.samp_period_ms = "100";
+    daq_request_cmd.sig_id_list = [];
 
     var i = 0;
-    for(signal in serverMsg.signals){
-      
-      daq_request_cmd.id[i++] = signal.id[i++]
+    for(i = 0; i < serverMsg.signals.length; i++){
+      daq_request_cmd.sig_id_list[i] = serverMsg.signals[i].id;
     }
 
-    websocket.send(JSON.stringify(daq_request_cmd));
+    var sendVal = JSON.stringify(daq_request_cmd);
+    dataSocket.send(sendVal);
+
+    genInitTable(serverMsg.signals);
+
+    var sendVal = JSON.stringify({cmd: "start"});
+    dataSocket.send(sendVal);
 
   } else if(serverMsg.type == "daq_update") {
     if(serverMsg.daq_id == "main"){
-
+      updateTable(serverMsg);
     }
   }
-
-  genTable(serverMsg.signals);
+  
   numTransmissions = numTransmissions + 1;
   document.getElementById("id01").innerHTML = "COM Status: Socket Open. RX Count:" + numTransmissions; 
 };
@@ -57,17 +62,23 @@ dataSocket.onclose = function (error) {
   alert("ERROR from Present State: Robot Disconnected!!!\n\nAfter connecting to the robot, open the driver station, then refresh this page.");
 };
 
-function genTable(arr) {
+function genInitTable(arr) {
     var i;
     var out = "<table border=\"1\">";
 
-    for(i = 0; i < arr.state_array.length; i++) {
+    for(i = 0; i < arr.length; i++) {
         out += "<tr><td>" +
-        arr.state_array[i].name +
-        "</td><td style=\"width: 200px;\">" +
-        arr.state_array[i].value +
+        arr[i].display_name +
+        "</td><td>" +
+        arr[i].units +
+        "</td><td id=\"elem_disp_" + arr[i]  + "\" style=\"width: 200px;\">" +
+        "??" +
         "</td></tr>";
     }
     out += "</table>";
     document.getElementById("id02").innerHTML = out;
+}
+
+function updateTable(updObj) {
+  var temp = 0;
 }
