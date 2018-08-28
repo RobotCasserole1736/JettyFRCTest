@@ -71,7 +71,7 @@ function genInitTable(arr) {
         arr[i].display_name +
         "</td><td>" +
         arr[i].units +
-        "</td><td id=\"elem_disp_" + arr[i]  + "\" style=\"width: 200px;\">" +
+        "</td><td id=\"elem_disp_id_" + arr[i].id  + "\" style=\"width: 200px;\">" +
         "??" +
         "</td></tr>";
     }
@@ -80,5 +80,14 @@ function genInitTable(arr) {
 }
 
 function updateTable(updObj) {
-  var temp = 0;
+  var sig_idx = 0;
+
+  if(updObj.daq_id == "main" && updObj.type == "daq_update"){
+    for(sig_idx = 0; sig_idx < updObj.signals.length; sig_idx++){
+      var signal = updObj.signals[sig_idx];
+      if(signal.samples.length > 0){
+        document.getElementById("elem_disp_id_" + signal.id).innerHTML = signal.samples[signal.samples.length-1].val;
+      }
+    }
+  }
 }

@@ -46,6 +46,11 @@ public class CasseroleWebServer {
 
     static Server server;
 
+    String resourceBase = "/home/lvuser/resources/";
+    public void setResourceBase(String base_in){
+        resourceBase = base_in;
+    }
+
 
     /**
      * Starts the web server in a new thread. Should be called at the end of robot initialization.
@@ -75,11 +80,7 @@ public class CasseroleWebServer {
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[] {"index.html"});
-        if (LOCAL_PC_DEBUG_PATHS) {
-            resource_handler.setResourceBase("resources/");
-        } else {
-            resource_handler.setResourceBase("/home/lvuser/resources/");
-        }
+        resource_handler.setResourceBase(resourceBase);
         server.insertHandler(resource_handler);
 
         // StateStreamer - broadcasts present state of robot. RPM's, voltages, etc.

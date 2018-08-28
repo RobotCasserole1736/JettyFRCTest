@@ -75,7 +75,7 @@ public class AcqList {
         	}
         	
         	JSONObject signal_obj = new JSONObject();
-        	signal_obj.put("name", sig.getName());
+        	signal_obj.put("id", sig.getID());
         	signal_obj.put("samples", sample_arr);
         	
         	signal_array.add(signal_obj);
@@ -84,7 +84,7 @@ public class AcqList {
         // package array into object
         tx_obj.put("type", "daq_update");
         tx_obj.put("daq_id", id);
-        tx_obj.put("samples", signal_array);
+        tx_obj.put("signals", signal_array);
         
     	return tx_obj;
 
@@ -103,9 +103,10 @@ public class AcqList {
         	try {
 				client.sendString(getData(System.currentTimeMillis()).toJSONString());
 			} catch (IOException e) {
-				System.out.println("Error: Cannot transmit message");
-				e.printStackTrace();
+				System.out.println("Endpoint for acq list " + id + " disconnected.");
+				stopTransmit();
 			}
+
         }
     }
 	

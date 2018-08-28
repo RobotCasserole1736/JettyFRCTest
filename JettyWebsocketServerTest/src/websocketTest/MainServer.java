@@ -14,6 +14,8 @@ public class MainServer {
 
 		datasource.initDataGeneration();
 		datasource.startDataGeneration();
+
+		webserver.setResourceBase("resources/");
 		webserver.startServer();
 		
 		CasseroleDataServer.getInstance().startServer();

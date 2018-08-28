@@ -66,7 +66,7 @@ public class CasseroleDataServer {
      * @param newSig
      */
     void registerSignal(Signal newSig) {
-    	signalList.put(newSig.getName(), newSig);
+    	signalList.put(newSig.getID(), newSig);
     }
     
     Signal getSignalFromId(String id) {

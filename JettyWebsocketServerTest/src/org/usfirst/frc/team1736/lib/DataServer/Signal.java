@@ -88,11 +88,11 @@ public class Signal {
 		
 		int i = samples.size()-1;
 		
-		while(samples.get(i).getSampleTime_ms() >= req_time_ms - spec_in.getTxRate_ms() && i >= 0) {
+		while(i >= 0 && samples.get(i).getSampleTime_ms() >= req_time_ms - spec_in.getTxRate_ms() ) {
 			
 			if(spec_in.getSamplePeriod_ms() > 0) {
 				/* Need to downsample the data returned */
-				if(samples.get(i).getSampleTime_ms() <= spec_in.getTimestampOfMostRecentTXedSample_ms() + spec_in.getSamplePeriod_ms() ) {
+				if(samples.get(i).getSampleTime_ms() >= spec_in.getTimestampOfMostRecentTXedSample_ms() + spec_in.getSamplePeriod_ms() ) {
 					/* time to snag another sample */
 					retval.add(0, samples.get(i));
 					spec_in.setTimestampOfMostRecentTXedSample_ms(samples.get(i).getSampleTime_ms());
@@ -104,7 +104,10 @@ public class Signal {
 			
 			i--;
 		}
-		return (DataSample[]) retval.toArray();
+
+		DataSample[] retArray = new DataSample[retval.size()];
+		retval.toArray(retArray);
+		return retArray;
 	}
 	
 	
@@ -152,7 +155,7 @@ public class Signal {
 	/**
 	 * @return The name of the signal
 	 */
-	public String getName(){
+	public String getID(){
 		return id;
 	}
 	
