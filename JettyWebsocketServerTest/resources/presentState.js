@@ -25,8 +25,8 @@ dataSocket.onmessage = function (event) {
     // When the server sends us a signal list, we respond by requesting a single DAQ List with every signal
     daq_request_cmd.cmd = "addDaq";
     daq_request_cmd.id = "main";
-    daq_request_cmd.tx_period_ms = "100";
-    daq_request_cmd.samp_period_ms = "100";
+    daq_request_cmd.tx_period_ms = "100"; //Sets the frequency of packet transmit from RIO to this client
+    daq_request_cmd.samp_period_ms = "0"; //Sets the decimation of the data expected. 0 = return all data, non-zero = decimate data prior to send.
     daq_request_cmd.sig_id_list = [];
 
     var i = 0;

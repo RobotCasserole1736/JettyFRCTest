@@ -43,7 +43,10 @@ public class Signal {
 	 */
 	public void addSample(double time_in, double value_in){
 		if(dataSamplingNeeded()){
-			samples.add(new DataSample(time_in, value_in));
+			synchronized(samples){
+				samples.add(new DataSample(time_in, value_in));
+			}
+			
 		}
 	}
 	
@@ -54,10 +57,12 @@ public class Signal {
 	 * @param spec_in
 	 */
 	public void addAcqSpec(AcqSpec spec_in) {
-		if(!acqSpecs.contains(spec_in)) {
-			acqSpecs.add(spec_in);	
-		} else {
-			System.out.println("Warning: DataServer: Cannot add AcqSpec " + spec_in.toString() + " - it has already been added to signal " + id);
+		synchronized(acqSpecs){
+			if(!acqSpecs.contains(spec_in)) {
+				acqSpecs.add(spec_in);	
+			} else {
+				System.out.println("Warning: DataServer: Cannot add AcqSpec " + spec_in.toString() + " - it has already been added to signal " + id);
+			}
 		}
 
 	}
@@ -69,41 +74,63 @@ public class Signal {
 	 * @param spec_in
 	 */
 	public void rmAcqSpec(AcqSpec spec_in) {
-		if(acqSpecs.contains(spec_in)) {
-			acqSpecs.remove(spec_in);	
-		} else {
-			System.out.println("Warning: DataServer: Cannot remove AcqSpec " + spec_in.toString() + " - it is not in signal " + id);
+		synchronized(acqSpecs){
+			if(acqSpecs.contains(spec_in)) {
+				acqSpecs.remove(spec_in);	
+			} else {
+				System.out.println("Warning: DataServer: Cannot remove AcqSpec " + spec_in.toString() + " - it is not in signal " + id);
+			}
 		}
 	}
 	
 	
 	/**
 	 * Returns an array of all the samples currently in the queue, and then clears it.
+	 * Samples are returned with the oldest sample at index 0, newest at the end of the array.
+	 * The array of samples is downsampled to the requested rate if needed.
 	 * It is intended that the webserver would call this to transmit all available 
 	 * data from previous iterations. 
 	 */
 	public DataSample[] getSamples(AcqSpec spec_in, double req_time_ms){
-		int max_size = samples.size();
-		ArrayList<DataSample> retval = new ArrayList<DataSample>(max_size);
-		
-		int i = samples.size()-1;
-		
-		while(i >= 0 && samples.get(i).getSampleTime_ms() >= req_time_ms - spec_in.getTxRate_ms() ) {
+		ArrayList<DataSample> retval;
+		synchronized(samples){
+			int max_size = samples.size();
+			retval = new ArrayList<DataSample>(max_size);
 			
-			if(spec_in.getSamplePeriod_ms() > 0) {
-				/* Need to downsample the data returned */
-				if(samples.get(i).getSampleTime_ms() >= spec_in.getTimestampOfMostRecentTXedSample_ms() + spec_in.getSamplePeriod_ms() ) {
-					/* time to snag another sample */
-					retval.add(0, samples.get(i));
-					spec_in.setTimestampOfMostRecentTXedSample_ms(samples.get(i).getSampleTime_ms());
+			//Start at newest sample
+			int sample_idx = samples.size()-1;
+
+			while(sample_idx >= 0) {
+				double sample_time_ms = samples.get(sample_idx).getSampleTime_ms();
+				double earliest_sample_time_to_tx = req_time_ms - spec_in.getTxRate_ms();
+
+				if( sample_time_ms >= earliest_sample_time_to_tx ) {
+					if(spec_in.getSamplePeriod_ms() > 0) {
+						/* Need to downsample the data returned */
+
+						/* Working backward, find the next time that we need to tx a sample at. */
+						double next_sample_time_to_tx = spec_in.getTimestampOfMostRecentTXedSample_ms() - spec_in.getSamplePeriod_ms();
+
+						if(sample_time_ms >= next_sample_time_to_tx ) {
+							/* time to snag another sample */
+							retval.add(0, samples.get(sample_idx));
+							spec_in.setTimestampOfMostRecentTXedSample_ms(sample_time_ms);
+						}
+					} else {
+						/* return samples at native period */
+						retval.add(0, samples.get(sample_idx));
+					}
+					
+					//Move on to next-older sample
+					sample_idx--;
+
+				} else {
+					break; //we're done transmitting 
 				}
-			} else {
-				/* return samples at native period */
-				retval.add(0, samples.get(i));
 			}
-			
-			i--;
 		}
+
+		trimSamples(req_time_ms);
 
 		DataSample[] retArray = new DataSample[retval.size()];
 		retval.toArray(retArray);
@@ -129,17 +156,19 @@ public class Signal {
 			oldest_rqd_timestamp = Math.min(spec.getOldestRqdTimestamp_ms(time_now_ms), oldest_rqd_timestamp);
 		}
 		
-		/* Go through the samples in the list until we find one which should be trimmed */
-		for(trim_start_idx = samples.size() - 1; trim_start_idx >= 0; trim_start_idx--) {
-			if(samples.get(trim_start_idx).getSampleTime_ms() < oldest_rqd_timestamp) {
-				break;
+		synchronized(samples){
+			/* Go through the samples in the list until we find one which should be trimmed */
+			for(trim_start_idx = samples.size() - 1; trim_start_idx >= 0; trim_start_idx--) {
+				if(samples.get(trim_start_idx).getSampleTime_ms() < oldest_rqd_timestamp) {
+					break;
+				}
 			}
-		}
-		
-		/* Remove this sample and all prior ones */
-		for(int i = trim_start_idx; i >= 0; i--)
-		{
-			samples.remove(i);
+			
+			/* Remove this sample and all prior ones */
+			for(int i = trim_start_idx; i >= 0; i--)
+			{
+				samples.remove(i);
+			}
 		}
 		
 		return;
@@ -149,7 +178,9 @@ public class Signal {
 	 * Discards all samples from the buffer
 	 */
 	public void forceClearSamples(){
-		samples.clear();
+		synchronized(samples){
+			samples.clear();
+		}
 	}
 	
 	/**

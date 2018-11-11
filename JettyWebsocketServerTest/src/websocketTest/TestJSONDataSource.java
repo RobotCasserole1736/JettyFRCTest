@@ -1,6 +1,7 @@
 package websocketTest;
 
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
+import org.usfirst.frc.team1736.lib.DataServer.CasseroleDataServer;
 import org.usfirst.frc.team1736.lib.DataServer.Signal;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleDriverView;
 import org.usfirst.frc.team1736.lib.WebServer.CasseroleWebPlots;
@@ -20,6 +21,8 @@ public class TestJSONDataSource {
 	
 	Signal testSig1;
 	Signal counterSig;
+	Signal memoryUsedSig;
+	Signal storedSamplesSig;
 	
 	public void initDataGeneration(){
 				
@@ -48,6 +51,8 @@ public class TestJSONDataSource {
 		
 		testSig1 = new Signal("Test Value 1", "km/h");
 		counterSig = new Signal("Loop Counter", "Loops");
+		memoryUsedSig = new Signal("JVM Memory", "Kb");
+		storedSamplesSig = new Signal("Data Server Stored Sample count", "");
 		
 		
 	}
@@ -99,6 +104,15 @@ public class TestJSONDataSource {
 					testSig1.addSample(sampleTime, TestData3);
 					
 					counter++;
+
+					if(((int)counter)%10==0){
+						Runtime rt = Runtime.getRuntime();
+						long total = rt.totalMemory();
+						long free = rt.freeMemory();
+						double used_kb = ((double)total - (double)free)/1024.0;
+						memoryUsedSig.addSample(sampleTime, used_kb);
+						storedSamplesSig.addSample(sampleTime, CasseroleDataServer.getInstance().getTotalStoredSamples());
+					}
 					
 					try {
 						Thread.sleep(20);

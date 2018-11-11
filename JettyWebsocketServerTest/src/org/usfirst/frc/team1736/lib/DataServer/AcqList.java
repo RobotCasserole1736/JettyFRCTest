@@ -41,8 +41,8 @@ public class AcqList {
         	sig.addAcqSpec(acquisitionSpec);
         }
         
-    	updater = new java.util.Timer("Realtime Plot Webpage Update");
-        updater.scheduleAtFixedRate(new dataAcqTask(), 0, Math.round(acquisitionSpec.getSamplePeriod_ms()));
+    	updater = new java.util.Timer("DataServer DAQ Transmit for " + id);
+        updater.scheduleAtFixedRate(new dataAcqTask(), 0, Math.round(acquisitionSpec.getTxRate_ms()));
 	}
 	
 	public void stopTransmit() {

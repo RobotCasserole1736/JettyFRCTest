@@ -83,6 +83,14 @@ public class CasseroleDataServer {
         return retval;
     }
 
+    public int getTotalStoredSamples(){
+        int retval = 0;
+        for(HashMap.Entry<String, Signal> entry : signalList.entrySet()){
+            retval += entry.getValue().samples.size();
+        }
+        return retval;
+    }
+
 
     /**
      * Starts the web server in a new thread. Should be called at the end of robot initialization.
