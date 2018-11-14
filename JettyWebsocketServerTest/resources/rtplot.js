@@ -4,11 +4,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 //Note - this PORT string must be aligned with the port the webserver is served on.
 // We'll hardcode for now, but this must remain aligned with the server java implementation
-var port = "5805";
+var port = "5806";
 var hostname = window.location.hostname+":"+port;
 
-//Set up the web socket
-var dataSocket = new WebSocket("ws://"+hostname+"/rtplot")
+var dataSocket = new WebSocket("ws://"+hostname+"/ds")
 
 var signal_names = []
 var signal_units = []
@@ -27,6 +26,8 @@ var time_range_sec = 10.0;
 var sq = {};
 
 var ls_sel_signals= []; //String array of the start-checked boxes from local storage
+
+var signal_name_to_plot_idx = {};
 
 //Set up Local Storage
 // LocalStorage is a javascript feature which allows you to store some string
@@ -146,6 +147,9 @@ dataSocket.onopen = function (event) {
     document.getElementById("id01").innerHTML = "COM Status: Socket Opened.";
     document.getElementById("stop_btn").disabled = true;
     document.getElementById("start_btn").disabled = false;
+
+    // Send the command to get the list of all signals
+    dataSocket.send(JSON.stringify({cmd: "getSig"}));
 };
 
 dataSocket.onerror = function (error) {
@@ -165,9 +169,9 @@ dataSocket.onclose = function (error) {
 dataSocket.onmessage = function (event) {
     var data = JSON.parse(event.data);
     if(data.type == "daq_update"){
-        addDataToPlot(data.samples);
-    } else if(data.type == "signal_list"){
-        genSignalListTable(data.signals);
+        addDataToPlot(data);
+    } else if(data.type == "sig_list"){
+        genSignalListTable(data);
     }
 
 };
@@ -183,31 +187,35 @@ function addDataToPlot(data){
     var samp_val;
     var newest_timestamp = 0;
     
-    //Iterate over all samples in all signals recieved
-    for(sig_iter = 0; sig_iter < data.length; sig_iter++){
-        for(samp_iter = 0; samp_iter < data[sig_iter].samples.length; samp_iter++){
-            
-            //Parse each sample time&value
-            samp_time = parseFloat(data[sig_iter].samples[samp_iter].time);
-            samp_val = parseFloat(data[sig_iter].samples[samp_iter].val);
-            
-            //Keep track of the most recent sample of all the data
-            if(samp_time > newest_timestamp){
-                newest_timestamp = samp_time;
+    if(data.daq_id == "main") {
+        //Iterate over all samples in all signals received
+        for(sig_iter = 0; sig_iter < data.signals.length; sig_iter++){
+            var signal = data.signals[sig_idx];
+
+            for(samp_iter = 0; samp_iter < signal.samples.length; samp_iter++){
+                
+                //Parse each sample time&value
+                samp_time = parseFloat(signal.samples[samp_iter].time);
+                samp_val = parseFloat(signal.samples[samp_iter].val);
+                
+                //Keep track of the most recent sample of all the data
+                if(samp_time > newest_timestamp){
+                    newest_timestamp = samp_time;
+                }
+                
+                //Add the sample to the plot
+                global_chart.series[sig_iter].addPoint([samp_time,samp_val],false,false,true);
             }
-            
-            //Add the saple to the plot
-            global_chart.series[sig_iter].addPoint([samp_time,samp_val],false,false,true);
         }
+
+        global_chart.xAxis[0].setExtremes(newest_timestamp - time_range_sec,newest_timestamp,false)
+        //Force a chart update to display the table
+        global_chart.redraw();
     }
-    
-    global_chart.xAxis[0].setExtremes(newest_timestamp - time_range_sec,newest_timestamp,false)
-    //Force a chart update to display the table
-    global_chart.redraw();
     
 }
 
-function genSignalListTable(arr){
+function genSignalListTable(data){
     var i;
     var col_counter = 0;
     var SIGNALS_PER_ROW = 1; //meh. html is hard.
@@ -225,14 +233,14 @@ function genSignalListTable(arr){
         }
     }
     
-    for(i = 0; i < arr.length; i++){
+    for(i = 0; i < data.signals.length; i++){
         //Record the signal info in local arrays for later use (when starting a new recording)
-        signal_names.push(arr[i].name);
-        signal_units.push(arr[i].units);
-        signal_display_names.push(arr[i].display_name);
+        signal_names.push(data.signals[i].id);
+        signal_units.push(data.signals[i].units);
+        signal_display_names.push(data.signals[i].display_name);
         
         //See if this signal's name is in the local storage list
-        if(ls_sel_signals.indexOf(arr[i].name) > -1){
+        if(ls_sel_signals.indexOf(data.signals[i].id) > -1){
             //If it is, we'll inject some HTML magic to make the box start out checked
             checked_state = "checked=\"checked\"";
         } else {
@@ -240,7 +248,7 @@ function genSignalListTable(arr){
         }
         
         //Add some html to display a checkbox for this signal
-        out += "<td><input type=\"checkbox\" name=\""+arr[i].name+"\" " + checked_state + " />"+arr[i].display_name+" (" + arr[i].units + ") </td></tr><tr>";
+        out += "<td><input type=\"checkbox\" name=\""+data.signals[i].id+"\" " + checked_state + " />"+data.signals[i].display_name+" (" + data.signals[i].units + ") </td></tr><tr>";
         
     }
     
@@ -251,33 +259,44 @@ function genSignalListTable(arr){
 }
 
 function handleStartBtnClick(){
-    var cmd = "start:";
     var temp_series = [];
     var units_to_yaxis_index = [];
     var yaxis_index = 0;
-    
-    
-    if(local_storage_available){
-        //Clear local storage if available
-        ls_sel_signals = [];
-    }
-    
-    //deep-copy the default chart options
-	var options = $.extend(true, {}, dflt_options)
-    
-    allow_scroll_zoom = false;
-    
+
     //Destroy any existing chart.
-	if(global_chart){
+    if(global_chart){
         //double check the user didn't click it by mistake.
         if(confirm('This will clear the current recording. Are you sure?')){
             global_chart.destroy();
         } else {
             return; //do nothing
         }
-		
-	}
-	
+        
+    }
+
+    var daq_request_cmd = {};
+
+    // When the server sends us a signal list, we respond by requesting a single DAQ List with every signal
+    daq_request_cmd.cmd = "addDaq";
+    daq_request_cmd.id = "main";
+    daq_request_cmd.tx_period_ms = "100"; //Sets the frequency of packet transmit from RIO to this client
+    daq_request_cmd.samp_period_ms = "100"; //Sets the decimation of the data expected. 0 = return all data, non-zero = decimate data prior to send.
+    daq_request_cmd.sig_id_list = [];
+    
+    
+    if(local_storage_available){
+        //Clear local storage if available
+        ls_sel_signals = [];
+    }
+
+    //Clear the signal name/ plot index lookup
+    signal_name_to_plot_idx = {};
+    
+    //deep-copy the default chart options
+    var options = $.extend(true, {}, dflt_options)
+    
+    // Disable manual scrolling. Autoscroll happens during capture
+    allow_scroll_zoom = false;
     
     //Disable signal selection
     document.getElementById("clear_btn").disabled = true;
@@ -289,6 +308,8 @@ function handleStartBtnClick(){
         }
     }
     
+    var plot_signal_idx = 0;
+
     //Select only checked signals
     for(i = 0; i < signal_names.length; i++){
         checkboxes = document.getElementsByName(signal_names[i]);
@@ -303,7 +324,9 @@ function handleStartBtnClick(){
                 }
                 
                 //Assemble command for sending to server
-                cmd += signal_names[i] + ",";
+                daq_request_cmd.sig_id_list.push(signal_names[i]);
+
+                signal_name_to_plot_idx[signal_names[i]] = plot_signal_idx;
                 
                 //Handle grouping like-units signals on the same Y axis
                 var unit = signal_units[i];
@@ -346,12 +369,9 @@ function handleStartBtnClick(){
                                       enabled: null
                                   },
                                  });
-
+                
+                plot_signal_idx++;
             }
-            
-
-    
-            
         }
     }
     
@@ -372,17 +392,23 @@ function handleStartBtnClick(){
     global_chart = new Highcharts.Chart(options);
 
     //Request data from robot
-    dataSocket.send(cmd); 
+    var sendVal = JSON.stringify(daq_request_cmd);
+    dataSocket.send(sendVal);
+
+    var sendVal = JSON.stringify({cmd: "start"});
+    dataSocket.send(sendVal);
+
     document.getElementById("stop_btn").disabled = false;
 }
 
 function handleStopBtnClick(){
     //Request stopping data from robot
-    dataSocket.send("stop:"); 
+    var sendVal = JSON.stringify({cmd: "stop"});
+    dataSocket.send(sendVal);
     
     document.getElementById("stop_btn").disabled = true;
     
-    //re-enable siagnal selection
+    //re-enable signal selection
     document.getElementById("clear_btn").disabled = false;
     document.getElementById("start_btn").disabled = false;
     for(i = 0; i < signal_names.length; i++){
@@ -394,12 +420,12 @@ function handleStopBtnClick(){
     
     allow_scroll_zoom = true;
     
-    //Reset chart bounds to all data recieved.
+    //Reset chart bounds to all data received.
     global_chart.xAxis[0].setExtremes(null,null)
 }
 
 function handleRefreshSignalsBtnClick(){
-    dataSocket.send("get_list:"); 
+    dataSocket.send(JSON.stringify({cmd: "getSig"}));
 }
 
 function handleClearBtnClick(){
@@ -426,15 +452,15 @@ function handleClearBtnClick(){
 
 var dflt_options =  {    
 
-		credits: {
-			enabled: false
-		},
+        credits: {
+            enabled: false
+        },
 
-		chart: {
-			zoomType: 'x',
-			renderTo: 'container',
-			animation: false,
-			ignoreHiddenSeries: true,
+        chart: {
+            zoomType: 'x',
+            renderTo: 'container',
+            animation: false,
+            ignoreHiddenSeries: true,
             resetZoomButton: {
                 position: {
                     align: 'left',
@@ -456,9 +482,9 @@ var dflt_options =  {
                     },
                 },
             },
-			panning: true,
-			panKey: 'shift',
-			showAxes: true,
+            panning: true,
+            panKey: 'shift',
+            showAxes: true,
             backgroundColor: {
                 linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
                 stops: [
@@ -466,16 +492,16 @@ var dflt_options =  {
                     [1, 'rgb(0, 0, 0)']
                 ]
             },
-		},
+        },
         
-		title: { 
+        title: { 
             //disable title
-			text: null,
-		},
+            text: null,
+        },
         
-		xAxis: {
-			type: 'linear',
-			title: 'Time (sec)',
+        xAxis: {
+            type: 'linear',
+            title: 'Time (sec)',
             lineColor: '#777',
             tickColor: '#444',
             gridLineColor: '#444',
@@ -491,12 +517,12 @@ var dflt_options =  {
                     color: '#D43',
                 },
             },
-		},
-		
-    	yAxis: [],
-		
-		legend: {
-			layout: 'vertical',
+        },
+        
+        yAxis: [],
+        
+        legend: {
+            layout: 'vertical',
             align: 'right',
             verticalAlign: 'top',
             borderWidth: 1,
@@ -508,41 +534,41 @@ var dflt_options =  {
             itemHoverStyle:{
                 color: 'gray'
             }  
-			
-		},
-		
-		exporting: {
-			enabled: false
-		},
-		
-		colors: ['#FF0000', '#0000FF', '#00FF00','#FF00FF', '#00FFFF', '#FFFF00'],
+            
+        },
+        
+        exporting: {
+            enabled: false
+        },
+        
+        colors: ['#FF0000', '#0000FF', '#00FF00','#FF00FF', '#00FFFF', '#FFFF00'],
    
-		plotOptions: {
-			line: {
-				marker: {
-					radius: 2
-				},
-				lineWidth: 1,
-				threshold: null,
-				animation: false,
-			}
-		},
-		tooltip: {
-			crosshairs: true,
-			hideDelay: 0,
-			shared: true,
-			backgroundColor: null,
+        plotOptions: {
+            line: {
+                marker: {
+                    radius: 2
+                },
+                lineWidth: 1,
+                threshold: null,
+                animation: false,
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            hideDelay: 0,
+            shared: true,
+            backgroundColor: null,
             snap: 30,
-			borderWidth: 1,
+            borderWidth: 1,
             borderColor: '#FF0000',
-			shadow: true,
-			animation: false,
-			useHTML: false,
-			style: {
+            shadow: true,
+            animation: false,
+            useHTML: false,
+            style: {
                 padding: 0,
                 color: '#D43',
             }
         },  
 
-		series: []
-	}
+        series: []
+    }
