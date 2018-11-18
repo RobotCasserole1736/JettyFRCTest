@@ -29,6 +29,8 @@ var ls_sel_signals= []; //String array of the start-checked boxes from local sto
 
 var signal_name_to_plot_idx = {};
 
+var first_sample_time = -1.0;
+
 //Set up Local Storage
 // LocalStorage is a javascript feature which allows you to store some string
 // on this particular client's PC. The usecase we'll be doing here is to remember
@@ -44,7 +46,7 @@ if (typeof(Storage) !== "undefined") {
 
 //The following chunk of main code and handler functions are to add chart interaction
 // which I find useful, but which highcharts does not implement natively.
-// Namely, I want a mouse-wheel zoom, which centeres around wherever the user's mouse
+// Namely, I want a mouse-wheel zoom, which centers around wherever the user's mouse
 // is sitting at.
 
 sq.e = document.getElementById("container");
@@ -100,18 +102,18 @@ function ChartMouseWheelHandler(e) {
             }
             
             
-            //Calcualte the above/below center widths
+            //Calculate the above/below center widths
             old_right_size = old_max - center;
             old_left_size = center - old_min;
             
-            //Calcualte a multiclipative factor (1.0 for no change, > 1.0 for more zoom, < 1.0 for less zoom)
+            //Calculate a multiplicative factor (1.0 for no change, > 1.0 for more zoom, < 1.0 for less zoom)
             scaler = (1-delta*0.1);
             
             //Apply the factor to the above/below center widths
             new_right_size = old_right_size * scaler;
             new_left_size = old_left_size * scaler;
             
-            //calcualte the new extents
+            //calculate the new extents
             new_max = center + new_right_size;
             new_min = center - new_left_size;
             
@@ -190,13 +192,21 @@ function addDataToPlot(data){
     if(data.daq_id == "main") {
         //Iterate over all samples in all signals received
         for(sig_iter = 0; sig_iter < data.signals.length; sig_iter++){
-            var signal = data.signals[sig_idx];
+            var signal = data.signals[sig_iter];
+            var chartIdx = signal_name_to_plot_idx[signal.id];
 
             for(samp_iter = 0; samp_iter < signal.samples.length; samp_iter++){
                 
                 //Parse each sample time&value
-                samp_time = parseFloat(signal.samples[samp_iter].time);
+                samp_time = parseFloat(signal.samples[samp_iter].time)/1000.0;
                 samp_val = parseFloat(signal.samples[samp_iter].val);
+
+                //Should be a one-time thing per run - check if we need to update the initial sample time
+                // This makes all charts start at 0.0 sec
+                if(first_sample_time < 0.0){
+                    first_sample_time = samp_time;
+                }
+                samp_time = samp_time - first_sample_time;
                 
                 //Keep track of the most recent sample of all the data
                 if(samp_time > newest_timestamp){
@@ -204,7 +214,7 @@ function addDataToPlot(data){
                 }
                 
                 //Add the sample to the plot
-                global_chart.series[sig_iter].addPoint([samp_time,samp_val],false,false,true);
+                global_chart.series[chartIdx].addPoint([samp_time,samp_val],false,false,true);
             }
         }
 
@@ -271,7 +281,6 @@ function handleStartBtnClick(){
         } else {
             return; //do nothing
         }
-        
     }
 
     var daq_request_cmd = {};
@@ -387,6 +396,9 @@ function handleStartBtnClick(){
     $.each(temp_series, function(itemNo, element) {
         options.series.push(element);
     });
+
+    //Reset "zero" point
+    first_sample_time = -1.0;
     
     //Create dat chart
     global_chart = new Highcharts.Chart(options);

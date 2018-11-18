@@ -83,23 +83,15 @@ public class CasseroleWebServer {
         resource_handler.setResourceBase(resourceBase);
         server.insertHandler(resource_handler);
 
-        // StateStreamer - broadcasts present state of robot. RPM's, voltages, etc.
-        ServletHolder statestreamHolder = new ServletHolder("statestream", new CasseroleStateStreamerServlet());
-        context.addServlet(statestreamHolder, "/statestream");
-
         // CalStreamer - Handles calibration viewing and updating
         ServletHolder calstreamHolder = new ServletHolder("calstream", new CasseroleCalStreamerServlet());
         context.addServlet(calstreamHolder, "/calstream");
 
-        // CalStreamer - Handles calibration viewing and updating
+        // DriverView Streamer - sends driver data to a connected webpage
         ServletHolder driverDatstreamHolder =
                 new ServletHolder("driverviewstream", new CasseroleDriverViewStreamerServlet());
         context.addServlet(driverDatstreamHolder, "/driverviewstream");
         
-        // RT Plot Streamer - broadcasts things which can be plotted in real-time
-        ServletHolder rtPlotHolder = new ServletHolder("rtplotstream", new CasseroleRTPlotStreamerServlet());
-        context.addServlet(rtPlotHolder, "/rtplot");
-
         // Kick off server in brand new thread.
         // Thanks to Team 254 for an example of how to do this!
         Thread serverThread = new Thread(new Runnable() {
