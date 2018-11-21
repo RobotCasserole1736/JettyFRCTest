@@ -1,7 +1,5 @@
 package websocketTest;
 
-import java.awt.geom.Point2D;
-
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 import org.usfirst.frc.team1736.lib.DataServer.CasseroleDataServer;
 import org.usfirst.frc.team1736.lib.DataServer.Signal;
@@ -97,13 +95,8 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
 					CasseroleDriverView.setStringBox("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 
-					if(counter < 50){
-						test_pose.setLeftMotorSpeed(5);
-						test_pose.setRightMotorSpeed(5);
-					} else {
-						test_pose.setLeftMotorSpeed(0);
-						test_pose.setRightMotorSpeed(0);
-					}
+					test_pose.setLeftWheelSpeed_RPM(191);
+					test_pose.setRightWheelSpeed_RPM(0);
 
 					test_pose.update();
 					
