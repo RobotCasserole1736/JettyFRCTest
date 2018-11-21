@@ -6,6 +6,15 @@ var hostname = window.location.hostname+":"+port;
 var dataSocket = new WebSocket("ws://"+hostname+"/ds")
 var numTransmissions = 0;
 
+var filterSpec = "";
+
+
+filterChangeHandler = function(filterspec_in){
+  console.log(filterspec_in);
+  filterSpec = filterSpec_in;
+}
+
+
 dataSocket.onopen = function (event) {
   document.getElementById("id01").innerHTML = "Socket Open";
 
@@ -85,9 +94,29 @@ function updateTable(updObj) {
   if(updObj.daq_id == "main" && updObj.type == "daq_update"){
     for(sig_idx = 0; sig_idx < updObj.signals.length; sig_idx++){
       var signal = updObj.signals[sig_idx];
+
       if(signal.samples.length > 0){
         document.getElementById("elem_disp_id_" + signal.id).innerHTML = signal.samples[signal.samples.length-1].val;
       }
+
+      if(checkName(signal.name)){
+        document.getElementById("elem_disp_id_" + signal.id).style.visibility = "visible";
+      } else {
+        document.getElementById("elem_disp_id_" + signal.id).style.visibility = "hidden";
+      }
+    }
+  }
+}
+
+function checkName(name){
+
+  if(filterSpec.length == 0){
+    return true;
+  } else {
+    if(name.includes(filterSpec)){
+      return true;
+    } else {
+      return false;
     }
   }
 }
