@@ -91,7 +91,7 @@ public class CasseroleWebServer {
         ServletHolder driverDatstreamHolder =
                 new ServletHolder("driverviewstream", new CasseroleDriverViewStreamerServlet());
         context.addServlet(driverDatstreamHolder, "/driverviewstream");
-        
+
         // Kick off server in brand new thread.
         // Thanks to Team 254 for an example of how to do this!
         Thread serverThread = new Thread(new Runnable() {

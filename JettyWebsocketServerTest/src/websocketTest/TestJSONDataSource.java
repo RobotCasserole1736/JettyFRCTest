@@ -1,5 +1,7 @@
 package websocketTest;
 
+import java.awt.geom.Point2D;
+
 import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 import org.usfirst.frc.team1736.lib.DataServer.CasseroleDataServer;
 import org.usfirst.frc.team1736.lib.DataServer.Signal;
@@ -27,10 +29,11 @@ public class TestJSONDataSource {
 	Signal DTLeftSpeedSig;
 	Signal DTRightSpeedSig;
 	Signal ShooterSpeedSig;
+	Signal RobotPose;
 	
 	public void initDataGeneration(){
 				
-		CasseroleDriverView.newDial("Test Val1 RPM", 0, 200, 25, 55, 130);
+		CasseroleDriverView.newDial("Test Val1 RPM", -300, 300, 50, -200, 200);
 		CasseroleDriverView.newDial("Test Val2 ft/s", -20, 20, 5, -3, 3);
 		CasseroleDriverView.newDial("Battery Volts", 0, 15, 1, 10.5, 13.5);
 		CasseroleDriverView.newWebcam("Test WebCam", "http://plazacam.studentaffairs.duke.edu/mjpg/video.mjpg", 50.0, 25.0, 90.0);
@@ -55,8 +58,6 @@ public class TestJSONDataSource {
 		DTRightSpeedSig = new Signal("DT Right Speed", "RPM");
 		ShooterSpeedSig = new Signal("Shooter Speed", "RPM");
 		
-		
-		
 	}
 	
 	public void startDataGeneration(){
@@ -64,13 +65,15 @@ public class TestJSONDataSource {
 		cal2 = new Calibration("Cal2",15.0);
 		counter = 0;
 		
+		RobotPose test_pose = new RobotPose();
+		
 		Thread dataGenThread = new Thread(new Runnable() {
 			@Override
 			public void run(){
 				while(true){
 					TestData1 = TestData1 - 3 + (int)cal1.get();
 					TestData2 = TestData1/2.0 + 4.0 + cal2.get();
-					TestData3 = cal1.get()*Math.sin(counter/cal2.get())+50;
+					TestData3 = 250*Math.sin(counter/cal2.get());
 					TestBool = TestData3 > 87.0;
 
 					double sampleTime = System.currentTimeMillis();
@@ -94,6 +97,16 @@ public class TestJSONDataSource {
 					CasseroleDriverView.setBoolean("Test Bool Display 3", TestData3 > 55.0);
 					CasseroleDriverView.setStringBox("Test String", CasseroleDriverView.getAutoSelectorVal("Auto Two"));
 
+					if(counter < 50){
+						test_pose.setLeftMotorSpeed(5);
+						test_pose.setRightMotorSpeed(5);
+					} else {
+						test_pose.setLeftMotorSpeed(0);
+						test_pose.setRightMotorSpeed(0);
+					}
+
+					test_pose.update();
+					
 					counter++;
 
 					if(((int)counter)%10==0){

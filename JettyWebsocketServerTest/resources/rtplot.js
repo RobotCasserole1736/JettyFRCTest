@@ -285,7 +285,7 @@ function handleStartBtnClick(){
 
     var daq_request_cmd = {};
 
-    // When the server sends us a signal list, we respond by requesting a single DAQ List with every signal
+    // assemble DAQ setup command
     daq_request_cmd.cmd = "addDaq";
     daq_request_cmd.id = "main";
     daq_request_cmd.tx_period_ms = "100"; //Sets the frequency of packet transmit from RIO to this client
