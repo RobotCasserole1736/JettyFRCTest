@@ -13,13 +13,16 @@
 
 <h1>Data From Robot</h1>
 <hr>
-<div/>
+</div>
 <div id="id01">COM Status: Socket Not Yet Opened...</div>
 
 <div id="UserInput">
-<br>
-<input id="filterTextInput" type="text" placeholder="Name Filter" onchange="filterChangeHandler(this.value)">
-<br> <br>
+<table border="1">
+  <br>
+  <tr><td>
+      <input id="filterTextInput" type="text" placeholder="Name Filter" onkeyup="filterChangeHandler(this.value)">
+    </td></tr>
+</table>
 </div>
 
 <div id="id02"></div>

@@ -7,11 +7,9 @@ var dataSocket = new WebSocket("ws://"+hostname+"/ds")
 var numTransmissions = 0;
 
 var filterSpec = "";
-
-
+var idToName = {};
 filterChangeHandler = function(filterspec_in){
-  console.log(filterspec_in);
-  filterSpec = filterSpec_in;
+  filterSpec = filterspec_in.toLowerCase();
 }
 
 
@@ -40,6 +38,7 @@ dataSocket.onmessage = function (event) {
 
     var i = 0;
     for(i = 0; i < serverMsg.signals.length; i++){
+      idToName[serverMsg.signals[i].id] = serverMsg.signals[i].display_name; //Record a mapping of all displayed signal names to their underlying id's
       daq_request_cmd.sig_id_list[i] = serverMsg.signals[i].id;
     }
 
@@ -76,7 +75,7 @@ function genInitTable(arr) {
     var out = "<table border=\"1\">";
 
     for(i = 0; i < arr.length; i++) {
-        out += "<tr><td>" +
+        out += "<tr id=\"elem_row_id_" + arr[i].id  + "\"><td>" +
         arr[i].display_name +
         "</td><td>" +
         arr[i].units +
@@ -99,10 +98,10 @@ function updateTable(updObj) {
         document.getElementById("elem_disp_id_" + signal.id).innerHTML = signal.samples[signal.samples.length-1].val;
       }
 
-      if(checkName(signal.name)){
-        document.getElementById("elem_disp_id_" + signal.id).style.visibility = "visible";
+      if(checkName(idToName[signal.id])){
+        document.getElementById("elem_row_id_" + signal.id).style.visibility = "visible";
       } else {
-        document.getElementById("elem_disp_id_" + signal.id).style.visibility = "hidden";
+        document.getElementById("elem_row_id_" + signal.id).style.visibility = "collapse";
       }
     }
   }
@@ -113,7 +112,7 @@ function checkName(name){
   if(filterSpec.length == 0){
     return true;
   } else {
-    if(name.includes(filterSpec)){
+    if(name.toLowerCase().includes(filterSpec)){
       return true;
     } else {
       return false;

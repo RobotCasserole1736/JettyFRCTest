@@ -16,8 +16,19 @@
 <div id="id01">COM Status: Socket Not Yet Opened...</div>
 
 <br>
+<table border="1">
+    <br>
+    <tr>
+        <td>
+            <input id="filterTextInput" type="text" placeholder="Name Filter" onkeyup="filterChangeHandler(this.value)">
+        </td>
+      <td>
+        <button id="save_btn" type="button" onclick="handleSaveBtnClick()">Save to File</button> 
+      </td>
+    </tr>
+  </table>
+  </div>
 
-<button id="save_btn" type="button" onclick="handleSaveBtnClick()">Save to File</button> 
 
 <br>
 

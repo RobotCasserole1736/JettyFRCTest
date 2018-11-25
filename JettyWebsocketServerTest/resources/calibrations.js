@@ -3,7 +3,33 @@
 var port = "5805";
 var hostname = window.location.hostname+":"+port;
 
-var dataSocket = new WebSocket("ws://"+hostname+"/calstream")
+var dataSocket = new WebSocket("ws://"+hostname+"/calstream");
+
+var filterSpec = "";
+var idToName = {};
+filterChangeHandler = function(filterspec_in){
+  filterSpec = filterspec_in.toLowerCase();
+  var inputBoxes = document.getElementById("id02").querySelectorAll("input");
+  for(var i = 0; i < inputBoxes.length; i++){
+    if(checkName(inputBoxes[i].name.toLowerCase())){
+      document.getElementById(inputBoxes[i].name + "_row").style.visibility = "visible";
+    } else {
+      document.getElementById(inputBoxes[i].name + "_row").style.visibility  = "collapse";
+    }
+  }
+}
+
+function checkName(name){
+    if(filterSpec.length == 0){
+      return true;
+    } else {
+      if(name.toLowerCase().includes(filterSpec)){
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
 
 dataSocket.onopen = function (event) {
   document.getElementById("id01").innerHTML = "COM Status: Socket Opened.";
@@ -54,7 +80,7 @@ function genTable(arr) {
            "</td></tr>";
     
     for(i = 0; i < arr.cal_array.length; i++) {
-        out += "<tr><td>" +
+        out += "<tr id=\""+arr.cal_array[i].name+"_row\"><td>" +
                arr.cal_array[i].name +
                "</td><td style=\"width: 100px;\">" +
                arr.cal_array[i].dflt_val +
