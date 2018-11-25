@@ -20,7 +20,7 @@ var FIELDPOLY_FT =
     ];
 
 //Render Constants
-var PX_PER_FOOT = 13;
+var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#fdd';
 var BOT_COLOR = '#d22';
 var CANVAS_MARGIN_PX = 20;
