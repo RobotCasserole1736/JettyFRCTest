@@ -56,9 +56,12 @@ public class CasseroleDataServer {
     
     private Server server;
     private HashMap<String, Signal> signalList;
+
+    public signalFileLogger logger;
     
     private CasseroleDataServer() {
-    	signalList = new HashMap<String, Signal>();
+        signalList = new HashMap<String, Signal>();
+        logger = new signalFileLogger();
     }
     
     /**

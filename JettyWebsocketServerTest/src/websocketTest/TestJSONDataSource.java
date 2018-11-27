@@ -64,10 +64,13 @@ public class TestJSONDataSource {
         counter = 0;
         
         RobotPose test_pose = new RobotPose();
-        
         test_pose.setRobotPose(4,5,45);
+
+        TestData1 = 0;
+        TestData2 = 0;
+        TestBool = false;
         
-        Thread dataGenThread = new Thread(new Runnable() {
+        Thread dataGenThread_20ms = new Thread(new Runnable() {
             @Override
             public void run(){
                 while(true){
@@ -102,17 +105,6 @@ public class TestJSONDataSource {
 
                     test_pose.update();
                     
-                    counter++;
-
-                    if(((int)counter)%10==0){
-                        Runtime rt = Runtime.getRuntime();
-                        long total = rt.totalMemory();
-                        long free = rt.freeMemory();
-                        double used_kb = ((double)total - (double)free)/1024.0;
-                        memoryUsedSig.addSample(sampleTime, used_kb);
-                        storedSamplesSig.addSample(sampleTime, CasseroleDataServer.getInstance().getTotalStoredSamples());
-                    }
-                    
                     try {
                         Thread.sleep(20);
                     } catch (InterruptedException e) {
@@ -122,12 +114,41 @@ public class TestJSONDataSource {
 
             }
         });
+
+        Thread dataGenThread_100ms = new Thread(new Runnable() {
+            @Override
+            public void run(){
+                while(true){
+
+                    double sampleTime = System.currentTimeMillis();
+
+                    Runtime rt = Runtime.getRuntime();
+                    long total = rt.totalMemory();
+                    long free = rt.freeMemory();
+                    double used_kb = ((double)total - (double)free)/1024.0;
+                    memoryUsedSig.addSample(sampleTime, used_kb);
+                    storedSamplesSig.addSample(sampleTime, CasseroleDataServer.getInstance().getTotalStoredSamples());
+
+                    if(counter++ == 100){
+                        //Stop the file logger after 10 seconds of data
+                        CasseroleDataServer.getInstance().logger.stopLogging();
+                    }
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
         
-        TestData1 = 0;
-        TestData2 = 0;
-        TestBool = false;
-        dataGenThread.setName("CasseroleTestDataGenerator");
-        dataGenThread.start();
+        CasseroleDataServer.getInstance().logger.startLoggingAuto();
+        dataGenThread_20ms.setName("CasseroleTestDataGenerator_20ms");
+        dataGenThread_20ms.start();
+        dataGenThread_100ms.setName("CasseroleTestDataGenerator_100ms");
+        dataGenThread_100ms.start();
     }
 
 }

@@ -41,13 +41,14 @@ public class Signal {
 	 * @param time_in
 	 * @param value_in
 	 */
-	public void addSample(double time_in, double value_in){
+	public void addSample(double time_in_ms, double value_in){
 		if(dataSamplingNeeded()){
 			synchronized(samples){
-				samples.add(new DataSample(time_in, value_in));
+				samples.add(new DataSample(time_in_ms, value_in));
 			}
-			
 		}
+
+		CasseroleDataServer.getInstance().logger.addSample(this, time_in_ms/1000.0, value_in);
 	}
 	
 	
