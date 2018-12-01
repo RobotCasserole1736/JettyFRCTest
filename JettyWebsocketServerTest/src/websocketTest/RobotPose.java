@@ -135,13 +135,13 @@ public class RobotPose {
     
     private void handleFieldColission(){
 
-		//Helper calculations for distance from robot center out to sides
+        //Helper calculations for distance from robot center out to sides
         final double dx = BUMPER_WIDTH_FT/2.0;
-		final double dy = BUMPER_LENGTH_FT/2.0;
-		final double ndx = -1.0*dx;
+        final double dy = BUMPER_LENGTH_FT/2.0;
+        final double ndx = -1.0*dx;
         final double ndy = -1.0*dy;
 
-		//Calculate verticie locations using 2d rotation formulae https://academo.org/demos/rotation-about-point/
+        //Calculate verticie locations using 2d rotation formulae https://academo.org/demos/rotation-about-point/
         double FL_Corner_X = poseX + ( ndx*cos(poseT) -  dy*sin(poseT) );
         double FL_Corner_Y = poseY + (  dy*cos(poseT) + ndx*sin(poseT) );
         double FR_Corner_X = poseX + (  dx*cos(poseT) -  dy*sin(poseT) );
@@ -151,36 +151,36 @@ public class RobotPose {
         double RR_Corner_X = poseX + (  dx*cos(poseT) - ndy*sin(poseT) );
         double RR_Corner_Y = poseY + ( ndy*cos(poseT) +  dx*sin(poseT) );
  
-		//The extrema of the verticiecs forms the bounding box of the robot
+        //The extrema of the verticiecs forms the bounding box of the robot
         double robotFrontBounds = max4(FL_Corner_Y, FR_Corner_Y, RL_Corner_Y, RR_Corner_Y);
         double robotRearBounds  = min4(FL_Corner_Y, FR_Corner_Y, RL_Corner_Y, RR_Corner_Y);
         double robotRightBounds = max4(FL_Corner_X, FR_Corner_X, RL_Corner_X, RR_Corner_X);
         double robotLeftBounds  = min4(FL_Corner_X, FR_Corner_X, RL_Corner_X, RR_Corner_X);
 
-		//If the corresponding side of the boundary box exceeds the field boundary, the robot is in colission with a wall.
+        //If the corresponding side of the boundary box exceeds the field boundary, the robot is in colission with a wall.
 
         if(robotFrontBounds > FIELD_UPPER_BOUNDARY_FT){
             //Robot colliding with opposing alliance wall
-			poseY -= (robotFrontBounds - FIELD_UPPER_BOUNDARY_FT); //Reset bot within field
-			//System.out.println("Colission with upper field boundary");
+            poseY -= (robotFrontBounds - FIELD_UPPER_BOUNDARY_FT); //Reset bot within field
+            //System.out.println("Colission with upper field boundary");
         }
 
         if(robotRearBounds < FIELD_LOWER_BOUNDARY_FT){
             //Robot colliding with your alliance wall
-			poseY += (FIELD_LOWER_BOUNDARY_FT - robotRearBounds); //Reset bot within field
-			//System.out.println("Colission with Lower field boundary");
+            poseY += (FIELD_LOWER_BOUNDARY_FT - robotRearBounds); //Reset bot within field
+            //System.out.println("Colission with Lower field boundary");
         }
 
         if(robotRightBounds > FIELD_RIGHT_BOUNDARY_FT){
             //Robot colliding with opposing alliance wall
-			poseX -= (robotRightBounds - FIELD_RIGHT_BOUNDARY_FT); //Reset bot within field
-			//System.out.println("Colission with Right field boundary");
+            poseX -= (robotRightBounds - FIELD_RIGHT_BOUNDARY_FT); //Reset bot within field
+            //System.out.println("Colission with Right field boundary");
         }
 
         if(robotLeftBounds < FIELD_LEFT_BOUNDARY_FT){
             //Robot colliding with opposing alliance wall
-			poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
-			//System.out.println("Colission with Left field boundary");
+            poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
+            //System.out.println("Colission with Left field boundary");
         }
     }
     
