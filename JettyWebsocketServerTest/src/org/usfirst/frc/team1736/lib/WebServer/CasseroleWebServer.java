@@ -27,15 +27,18 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * DESCRIPTION: <br>
- * Basic controls for a customized Jetty embedded webserver, serving up a fixed number of useful
- * pages for displaying robot data and calibration information. <br>
+ * Basic controls for a customized Jetty embedded webserver, serving up a fixed
+ * number of useful pages for displaying robot data and calibration information.
+ * <br>
  * ASSUMPTIONS: <br>
- * Be sure to use the DriverView and WebStates classes to assign content into the web pages. <br>
+ * Be sure to use the DriverView and WebStates classes to assign content into
+ * the web pages. <br>
  * USAGE:
  * <ol>
  * <li>Instantiate class</li>
  * <li>On init, assign content to web pages.</li>
- * <li>Call startServer just before the robot enters disabled mode for the first time.</li>
+ * <li>Call startServer just before the robot enters disabled mode for the first
+ * time.</li>
  * </ol>
  * 
  *
@@ -43,43 +46,45 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 public class CasseroleWebServer {
 
-
     static Server server;
 
     String resourceBase = "/home/lvuser/resources/";
-    public void setResourceBase(String base_in){
+
+    public void setResourceBase(String base_in) {
         resourceBase = base_in;
     }
 
-
     /**
-     * Starts the web server in a new thread. Should be called at the end of robot initialization.
+     * Starts the web server in a new thread. Should be called at the end of robot
+     * initialization.
      */
     public void startServer() {
-
-        final boolean LOCAL_PC_DEBUG_PATHS = true;
 
         // New server will be on the robot's address plus port 5805
         server = new Server(5805);
 
-
         // Set up classes which will handle web requests
         // I'm not entirely certain how we'll make this work, but here's my first pass:
-        // The build process has been modified to also copy the web resource files to the RIO
-        // Since we're not really concerned about security, the files are all accessible.
-        // the resource_handler makes the .html/.css files on the RIO available to a client to
+        // The build process has been modified to also copy the web resource files to
+        // the RIO
+        // Since we're not really concerned about security, the files are all
+        // accessible.
+        // the resource_handler makes the .html/.css files on the RIO available to a
+        // client to
         // access freely.
         // index.html is served by default if no other specific file is requested.
-        // The ServletContextHandler holds more specific types of content that can be served up
+        // The ServletContextHandler holds more specific types of content that can be
+        // served up
         // directly.
-        // Mostly this is the JSON data streams for displaying state data and config and stuff.
+        // Mostly this is the JSON data streams for displaying state data and config and
+        // stuff.
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
 
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
-        resource_handler.setWelcomeFiles(new String[] {"index.html"});
+        resource_handler.setWelcomeFiles(new String[] { "index.html" });
         resource_handler.setResourceBase(resourceBase);
         server.insertHandler(resource_handler);
 
@@ -88,8 +93,8 @@ public class CasseroleWebServer {
         context.addServlet(calstreamHolder, "/calstream");
 
         // DriverView Streamer - sends driver data to a connected webpage
-        ServletHolder driverDatstreamHolder =
-                new ServletHolder("driverviewstream", new CasseroleDriverViewStreamerServlet());
+        ServletHolder driverDatstreamHolder = new ServletHolder("driverviewstream",
+                new CasseroleDriverViewStreamerServlet());
         context.addServlet(driverDatstreamHolder, "/driverviewstream");
 
         // Kick off server in brand new thread.

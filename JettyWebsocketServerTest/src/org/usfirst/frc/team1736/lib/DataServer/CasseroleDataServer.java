@@ -28,54 +28,57 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * DESCRIPTION: <br>
- * Basic controls for a customized Jetty embedded data server, serving up flexible set of 
- * data samples, organized into acquisition lists and served at reasonable, requested rates. <br>
+ * Basic controls for a customized Jetty embedded data server, serving up
+ * flexible set of data samples, organized into acquisition lists and served at
+ * reasonable, requested rates. <br>
  * ASSUMPTIONS: <br>
  * (none yet?) <br>
  * USAGE:
  * <ol>
  * <li>Instantiate class</li>
  * <li>On init, assign content to web pages.</li>
- * <li>Call startServer just before the robot enters disabled mode for the first time.</li>
+ * <li>Call startServer just before the robot enters disabled mode for the first
+ * time.</li>
  * </ol>
  * 
  *
  */
 
 public class CasseroleDataServer {
-    
-	/* Singleton infrastructure */
+
+    /* Singleton infrastructure */
     private static CasseroleDataServer instance;
-    
-    public static CasseroleDataServer getInstance(){
-        if(instance == null){
+
+    public static CasseroleDataServer getInstance() {
+        if (instance == null) {
             instance = new CasseroleDataServer();
         }
         return instance;
     }
-    
+
     private Server server;
     private HashMap<String, Signal> signalList;
 
     public SignalFileLogger logger;
-    
+
     private CasseroleDataServer() {
         signalList = new HashMap<String, Signal>();
         logger = new SignalFileLogger();
     }
-    
+
     /**
-     * Adds a new, manually-sampled signal 
+     * Adds a new, manually-sampled signal
+     * 
      * @param newSig
      */
     void registerSignal(Signal newSig) {
-    	signalList.put(newSig.getID(), newSig);
+        signalList.put(newSig.getID(), newSig);
     }
-    
+
     Signal getSignalFromId(String id) {
-    	return signalList.get(id);
+        return signalList.get(id);
     }
-    
+
     /**
      * 
      * @return a simple array of all registered signals
@@ -86,35 +89,33 @@ public class CasseroleDataServer {
         return retval;
     }
 
-    public int getTotalStoredSamples(){
+    public int getTotalStoredSamples() {
         int retval = 0;
-        for(HashMap.Entry<String, Signal> entry : signalList.entrySet()){
+        for (HashMap.Entry<String, Signal> entry : signalList.entrySet()) {
             retval += entry.getValue().samples.size();
         }
         return retval;
     }
 
-
     /**
-     * Starts the web server in a new thread. Should be called at the end of robot initialization.
+     * Starts the web server in a new thread. Should be called at the end of robot
+     * initialization.
      */
     public void startServer() {
 
         // New server will be on the robot's address plus port 5806
         server = new Server(5806);
 
-
         // Set up classes which will handle web requests
-        // Mostly this is the JSON data streams for displaying state data and config and stuff.
+        // Mostly this is the JSON data streams for displaying state data and config and
+        // stuff.
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
-        
+
         // RT Plot Streamer - broadcasts things which can be plotted in real-time
         ServletHolder dataServerHolder = new ServletHolder("ds", new Servlet());
         context.addServlet(dataServerHolder, "/ds");
-
-
 
         // Kick off server in brand new thread.
         // Thanks to Team 254 for an example of how to do this!
@@ -122,7 +123,7 @@ public class CasseroleDataServer {
             @Override
             public void run() {
                 try {
-                	System.out.println("[Data Server]: Starting server");
+                    System.out.println("[Data Server]: Starting server");
                     server.start();
                     server.join();
                     System.out.println("[Data Server]: Server shut down");
@@ -132,9 +133,9 @@ public class CasseroleDataServer {
 
             }
         });
-        
+
         serverThread.setName("CasseroleDataServerThread");
-        serverThread.setPriority(Thread.MIN_PRIORITY+2);
+        serverThread.setPriority(Thread.MIN_PRIORITY + 2);
         serverThread.start();
     }
 

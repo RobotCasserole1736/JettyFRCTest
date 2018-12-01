@@ -136,9 +136,9 @@ public class CalWrangler {
                                 
                                 //Only call the calibration overridden if the values don't match.
                                 if(cal.cur_val != cal.default_val){
-                                	cal.overridden = true;
+                                    cal.overridden = true;
                                 } else {
-                                	cal.overridden = false;
+                                    cal.overridden = false;
                                 }
 
                             } catch (NumberFormatException e) {
@@ -192,7 +192,7 @@ public class CalWrangler {
             System.out.println("ERROR: Calibration: could not load cal file " + calFile + ". All calibrations left at default values.");
             return -1;
         } else {
-        	System.out.println("Calibration: Successfully loaded cal file " + calFile);
+            System.out.println("Calibration: Successfully loaded cal file " + calFile);
             return 0;
         }
 
@@ -252,7 +252,7 @@ public class CalWrangler {
         if (errors_present) {
             return -1;
         } else {
-        	System.out.println("Calibration: Cal file " + calFile + " successfully written.");
+            System.out.println("Calibration: Cal file " + calFile + " successfully written.");
             return 0;
         }
     }

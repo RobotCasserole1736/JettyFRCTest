@@ -1,6 +1,5 @@
 package org.usfirst.frc.team1736.lib.DataServer;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,62 +10,61 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class AcqList {
-    
+
     HashSet<Signal> signals;
     AcqSpec acquisitionSpec;
     String id;
     RemoteEndpoint client;
-    
+
     private Timer updater = null;
-    
-    
-    public AcqList(String id_in, double tx_period, double sample_period, String[] signal_uuids, RemoteEndpoint client_in) {
+
+    public AcqList(String id_in, double tx_period, double sample_period, String[] signal_uuids,
+            RemoteEndpoint client_in) {
         signals = new HashSet<Signal>();
         acquisitionSpec = new AcqSpec(tx_period, sample_period);
         id = id_in;
         client = client_in;
-        
-        for(String sig_id: signal_uuids) {
+
+        for (String sig_id : signal_uuids) {
             addSignal(CasseroleDataServer.getInstance().getSignalFromId(sig_id));
         }
-        
+
     }
-    
-    
+
     public void addSignal(Signal in) {
         signals.add(in);
     }
-    
+
     public void startTransmit() {
-        for(Signal sig : signals) {
+        for (Signal sig : signals) {
             sig.addAcqSpec(acquisitionSpec);
         }
-        
+
         updater = new java.util.Timer("DataServer DAQ Transmit for " + id);
         updater.scheduleAtFixedRate(new dataAcqTask(), 0, Math.round(acquisitionSpec.getTxRate_ms()));
     }
-    
+
     public void stopTransmit() {
-        for(Signal sig : signals) {
+        for (Signal sig : signals) {
             sig.rmAcqSpec(acquisitionSpec);
         }
-        
+
         updater.cancel();
     }
-    
+
     public JSONObject getData(double req_time_ms) {
         JSONObject tx_obj = new JSONObject();
         JSONArray signal_array = new JSONArray();
-        
+
         // Build up JSON structure of samples recorded.
         for (Signal sig : signals) {
-            
+
             JSONArray sample_arr = new JSONArray();
-            
+
             DataSample[] samples = sig.getSamples(acquisitionSpec, req_time_ms);
-            if(samples != null){
-                for(DataSample samp : samples){
-                    if(samp != null){
+            if (samples != null) {
+                for (DataSample samp : samples) {
+                    if (samp != null) {
                         JSONObject sample_obj = new JSONObject();
                         sample_obj.put("time", samp.getSampleTime_ms());
                         sample_obj.put("val", samp.getVal());
@@ -74,27 +72,28 @@ public class AcqList {
                     }
                 }
             }
-            
+
             JSONObject signal_obj = new JSONObject();
             signal_obj.put("id", sig.getID());
             signal_obj.put("samples", sample_arr);
-            
+
             signal_array.add(signal_obj);
         }
-        
+
         // package array into object
         tx_obj.put("type", "daq_update");
         tx_obj.put("daq_id", id);
         tx_obj.put("signals", signal_array);
-        
+
         return tx_obj;
 
     }
-    
+
     /**
-     * Timer task to periodically broadcast data to the client. Java multithreading magic here, do
-     * not touch! If you touch this, you will face the wrath of Chitulu, god of data streaming
-     * servers. May the oceans of 1's and 0's rise to praise him.
+     * Timer task to periodically broadcast data to the client. Java multithreading
+     * magic here, do not touch! If you touch this, you will face the wrath of
+     * Chitulu, god of data streaming servers. May the oceans of 1's and 0's rise to
+     * praise him.
      * 
      * @author Chris Gerth
      *
@@ -103,17 +102,17 @@ public class AcqList {
         public void run() {
             client.sendString(getData(System.currentTimeMillis()).toJSONString(), this);
         }
-        
+
         @Override
         public void writeFailed(Throwable arg0) {
             System.out.println("Endpoint for acq list " + id + " threw error.");
-			System.out.println(arg0.getMessage());
-			stopTransmit();
+            System.out.println(arg0.getMessage());
+            stopTransmit();
         }
-    
+
         @Override
         public void writeSuccess() {
-            return; //yay writes are happy
+            return; // yay writes are happy
         }
 
     }

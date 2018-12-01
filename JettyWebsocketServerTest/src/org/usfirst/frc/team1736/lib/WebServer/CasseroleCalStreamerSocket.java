@@ -30,13 +30,13 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 /**
  * DESCRIPTION: <br>
- * Private socket definition class that Jetty wants me to make public even though it doesn't
- * actually have to be. Don't use this for anything unless you know preciisely what you are doing.
+ * Private socket definition class that Jetty wants me to make public even
+ * though it doesn't actually have to be. Don't use this for anything unless you
+ * know preciisely what you are doing.
  */
 
 public class CasseroleCalStreamerSocket extends WebSocketAdapter {
     volatile int test_data;
-
 
     @Override
     public void onWebSocketText(String message) {
@@ -78,7 +78,6 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
         }
     }
 
-
     @Override
     public void onWebSocketConnect(Session sess) {
 
@@ -87,19 +86,17 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
         broadcastData();
     }
 
-
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
 
         super.onWebSocketClose(statusCode, reason);
     }
 
-
     /**
      * send a string message over the socket to notify the user of something.
      */
     @SuppressWarnings("unchecked")
-	public void broadcastMsg(String msg) {
+    public void broadcastMsg(String msg) {
         try {
             JSONObject full_obj = new JSONObject();
             // package array into object
@@ -112,15 +109,14 @@ public class CasseroleCalStreamerSocket extends WebSocketAdapter {
         }
     }
 
-
     /**
      * send socket data out to client
      */
     @SuppressWarnings("unchecked")
-	public void broadcastData() {
+    public void broadcastData() {
         if (isConnected()) {
-            Calibration[] allCals =
-                    CalWrangler.registeredCals.toArray(new Calibration[CalWrangler.registeredCals.size()]);
+            Calibration[] allCals = CalWrangler.registeredCals
+                    .toArray(new Calibration[CalWrangler.registeredCals.size()]);
 
             try {
                 JSONObject full_obj = new JSONObject();
