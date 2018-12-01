@@ -28,6 +28,7 @@ public class TestJSONDataSource {
     Signal DTRightSpeedSig;
     Signal ShooterSpeedSig;
     Signal RobotPose;
+    Signal LoggerSampleQueuLength;
     
     public void initDataGeneration(){
                 
@@ -55,6 +56,7 @@ public class TestJSONDataSource {
         DTLeftSpeedSig = new Signal("DT Left Speed", "RPM");
         DTRightSpeedSig = new Signal("DT Right Speed", "RPM");
         ShooterSpeedSig = new Signal("Shooter Speed", "RPM");
+        LoggerSampleQueuLength = new Signal("Logger Sample Queue Length", "count");
         
     }
     
@@ -109,9 +111,27 @@ public class TestJSONDataSource {
                         Thread.sleep(20);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
 
+            }
+        });
+
+        Thread dataGenThread_10ms = new Thread(new Runnable() {
+            @Override
+            public void run(){
+                while(true){
+                    double sampleTime = System.currentTimeMillis();
+                    LoggerSampleQueuLength.addSample(sampleTime, CasseroleDataServer.getInstance().logger.getSampleQueueLength());
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                }
             }
         });
 
@@ -129,26 +149,29 @@ public class TestJSONDataSource {
                     memoryUsedSig.addSample(sampleTime, used_kb);
                     storedSamplesSig.addSample(sampleTime, CasseroleDataServer.getInstance().getTotalStoredSamples());
 
-                    if(counter++ == 100){
-                        //Stop the file logger after 10 seconds of data
+                    if(counter++ % 50 == 0){
+                        //Make a bunch of 5 second logs
                         CasseroleDataServer.getInstance().logger.stopLogging();
+                        CasseroleDataServer.getInstance().logger.startLoggingTeleop();
                     }
 
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
 
             }
         });
         
-        CasseroleDataServer.getInstance().logger.startLoggingAuto();
         dataGenThread_20ms.setName("CasseroleTestDataGenerator_20ms");
         dataGenThread_20ms.start();
         dataGenThread_100ms.setName("CasseroleTestDataGenerator_100ms");
         dataGenThread_100ms.start();
+        dataGenThread_10ms.setName("CasseroleTestDataGenerator_10ms");
+        dataGenThread_10ms.start();
     }
 
 }

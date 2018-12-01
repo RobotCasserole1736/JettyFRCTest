@@ -3,7 +3,6 @@ package org.usfirst.frc.team1736.lib.DataServer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Queue;
 
 import org.json.simple.JSONObject;
 
@@ -42,13 +41,14 @@ public class Signal {
 	 * @param value_in
 	 */
 	public void addSample(double time_in_ms, double value_in){
+		DataSample newSample = new DataSample(time_in_ms, value_in, this);
 		if(dataSamplingNeeded()){
 			synchronized(samples){
-				samples.add(new DataSample(time_in_ms, value_in));
+				samples.add(newSample);
 			}
 		}
 
-		CasseroleDataServer.getInstance().logger.addSample(this, time_in_ms/1000.0, value_in);
+		CasseroleDataServer.getInstance().logger.addSample(newSample);
 	}
 	
 	
