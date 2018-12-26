@@ -64,14 +64,20 @@ public class RobotPose {
     double delta_t_sec = 0.02;
 
     //Simulation outputs
-    Signal poseXSig;
-    Signal poseYSig;
-    Signal poseTSig;
+    Signal desPoseXSig;
+    Signal desPoseYSig;
+    Signal desPoseTSig;
+    Signal actPoseXSig;
+    Signal actPoseYSig;
+    Signal actPoseTSig;
 
     public RobotPose(){
-        poseXSig = new Signal("botposex", "ft");
-        poseYSig = new Signal("botposey", "ft");
-        poseTSig = new Signal("botposeT", "deg");
+        desPoseXSig = new Signal("botDesPoseX", "ft");
+        desPoseYSig = new Signal("botDesPoseY", "ft");
+        desPoseTSig = new Signal("botDesPoseT", "deg");
+        actPoseXSig = new Signal("botActPoseX", "ft");
+        actPoseYSig = new Signal("botActPoseY", "ft");
+        actPoseTSig = new Signal("botActPoseT", "deg");
         prevLoopTime = System.currentTimeMillis();
 
         //Default Field start position
@@ -111,9 +117,12 @@ public class RobotPose {
         handleFieldColission();
 
         //Output to webpage
-        poseXSig.addSample(sampleTime, poseX);
-        poseYSig.addSample(sampleTime, poseY);
-        poseTSig.addSample(sampleTime, poseT);
+        desPoseXSig.addSample(sampleTime, poseX);
+        desPoseYSig.addSample(sampleTime, poseY);
+        desPoseTSig.addSample(sampleTime, poseT);
+        actPoseXSig.addSample(sampleTime, poseX*1.01+(Math.random()-0.5)*.1);
+        actPoseYSig.addSample(sampleTime, poseY*1.01+(Math.random()-0.5)*.1);
+        actPoseTSig.addSample(sampleTime, poseT);
         prevLoopTime = sampleTime;
     }
     
